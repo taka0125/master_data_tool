@@ -8,10 +8,11 @@ module MasterDataTool
       DEFAULT_IGNORE_TABLES = %w[ar_internal_metadata schema_migrations master_data_statuses]
       DEFAULT_IGNORE_COLUMNS = %w[created_at updated_at]
 
-      def initialize(ignore_empty_table: true, ignore_tables: [], ignore_column_names: [], verbose: false)
+      def initialize(ignore_empty_table: true, ignore_tables: [], ignore_column_names: [], only_tables: [], verbose: false)
         @ignore_empty_table = ignore_empty_table
         @ignore_tables = DEFAULT_IGNORE_TABLES + Array(MasterDataTool.config.dump_ignore_tables) + ignore_tables
         @ignore_column_names = DEFAULT_IGNORE_COLUMNS + Array(MasterDataTool.config.dump_ignore_columns) + ignore_column_names
+        @only_tables = Array(only_tables)
       end
 
       def execute
@@ -20,6 +21,11 @@ module MasterDataTool
             if @ignore_tables.include?(table)
               print_message "[ignore] #{table}"
 
+              next
+            end
+
+            if @only_tables.any? && !@only_tables.include?(table)
+              print_message "[skip] #{table}"
               next
             end
 

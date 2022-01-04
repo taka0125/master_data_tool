@@ -28,18 +28,21 @@ module MasterDataTool
     option :ignore_empty_table, default: true, type: :boolean
     option :ignore_tables, default: [], type: :array
     option :ignore_column_names, default: [], type: :array
+    option :only_tables, default: nil, type: :array
     option :verbose, default: false, type: :boolean
     desc 'dump', 'dump'
     def dump
       ignore_empty_table = options[:ignore_empty_table]
       ignore_tables = options[:ignore_tables]
       ignore_column_names = options[:ignore_column_names]
+      only_tables = options[:only_tables]
       verbose = options[:verbose]
 
       executor = MasterDataTool::Dump::Executor.new(
         ignore_empty_table: ignore_empty_table,
         ignore_tables: ignore_tables,
         ignore_column_names: ignore_column_names,
+        only_tables: only_tables,
         verbose: verbose
       )
       errors = executor.execute
