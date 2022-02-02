@@ -18,3 +18,15 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 end
+
+class DebugPrinter
+  include MasterDataTool::Report::Printer
+
+  def initialize(io)
+    @io = io
+  end
+
+  def print(message)
+    @io.puts message
+  end
+end
