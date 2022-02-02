@@ -17,7 +17,7 @@ module MasterDataTool
 
   class << self
     def config
-      @config ||= Config.default_config
+      @config ||= Config.new
     end
 
     def configure

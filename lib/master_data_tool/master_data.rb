@@ -103,14 +103,16 @@ module MasterDataTool
       @model_klass.table_name
     end
 
-    def import!(dry_run: true)
+    def import!(dry_run: true, delete_all_ignore_foreign_key: false)
       raise MasterDataTool::NotLoadedError unless @loaded
 
       MasterDataTool::Report::ImportReport.new(self).tap do |report|
         return report if dry_run
         return report unless affected?
 
+        disable_foreign_key_checks if delete_all_ignore_foreign_key
         @model_klass.delete_all
+        enable_foreign_key_checks if delete_all_ignore_foreign_key
 
         # マスターデータ間の依存がある場合に投入順制御するのは大変なのでこのタイミングでのバリデーションはしない
         @model_klass.import(import_records, validate: false, on_duplicate_key_update: @columns, timestamps: true)
@@ -151,6 +153,14 @@ module MasterDataTool
           records[id] = record
         end
       end
+    end
+
+    def enable_foreign_key_checks
+      ApplicationRecord.connection.execute('SET FOREIGN_KEY_CHECKS = 1')
+    end
+
+    def disable_foreign_key_checks
+      ApplicationRecord.connection.execute('SET FOREIGN_KEY_CHECKS = 0')
     end
   end
 end

@@ -12,6 +12,7 @@ RSpec.describe MasterDataTool::Import::Executor do
         except_verify_tables: except_verify_tables,
         skip_no_change: skip_no_change,
         silent: true,
+        delete_all_ignore_foreign_key: delete_all_ignore_foreign_key,
         report_printer: DebugPrinter.new(StringIO.new)
       )
     end
@@ -24,6 +25,7 @@ RSpec.describe MasterDataTool::Import::Executor do
     let(:only_verify_tables) { [] }
     let(:except_verify_tables) { [] }
     let(:skip_no_change) { true }
+    let(:delete_all_ignore_foreign_key) { false }
 
     let(:master_data_dir) { 'db/fixtures' }
 
@@ -193,6 +195,35 @@ RSpec.describe MasterDataTool::Import::Executor do
           result2.each do |master_data|
             expect(master_data).to be_loaded
           end
+        end
+      end
+    end
+
+    context 'delete_all_ignore_foreign_keyオプション' do
+      let(:delete_all_ignore_foreign_key) { true }
+      let(:master_data_dir) { 'db/fixtures/foreign_key_spec' }
+      let(:skip_no_change) { false }
+      let(:silent) { false }
+
+      context 'delete_all_ignore_foreign_key = true' do
+        it 'データが投入できる' do
+          MasterDataTool.configure do |config|
+            config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
+          end
+
+          MasterDataTool::Import::Executor.new(dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+
+          # 擬似的にマスタデータの変更を行う
+          MasterDataTool.configure do |config|
+            config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir + '/after')
+          end
+
+          # 通常ではtaggingsの前にtagsの削除が起こるが外部キー制約によりエラーになる
+          subject
+
+          expect(Item.count).to eq 3
+          expect(Tag.count).to eq 3
+          expect(Tagging.count).to eq 4
         end
       end
     end

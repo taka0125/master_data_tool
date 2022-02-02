@@ -15,6 +15,12 @@ create_table 'tags', id: :bigint, unsigned: true, force: :cascade do |t|
   t.datetime "updated_at", null: false
 end
 
+create_table 'taggings', id: :bigint, unsigned: true, force: :cascade do |t|
+  t.bigint   "tag_id", unsigned: true
+  t.datetime "created_at", null: false
+  t.datetime "updated_at", null: false
+end
+
 create_table 'master_data_statuses', id: :bigint, unsigned: true, force: :cascade, comment: "マスタデータの状態管理用テーブル" do |t|
   t.string   "name", limit: 255, null: false, comment: 'テーブル名'
   t.string   "version", limit: 255, null: false, comment: 'ハッシュ値'
@@ -24,3 +30,5 @@ end
 
 add_index 'master_data_statuses', ["name"], name: "idx_master_data_statuses_1", unique: true, using: :btree
 add_index 'master_data_statuses', ["name", "version"], name: "idx_master_data_statuses_2", using: :btree
+
+add_foreign_key "taggings", "tags"
