@@ -56,10 +56,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: debug
-        run: >-
-          echo $HOME
-
       - name: Setup MySQL 5.7
         run: >-
           docker run -p 127.0.0.1:3306:3306 --name master-data-tool-mysql57 -e MYSQL_ROOT_PASSWORD="f3WpxNreVT2NgQry" -d mysql:5.7 \
