@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= "test"
-require File.expand_path("../../spec/dummy/config/environment", __FILE__)
+version = Pathname.new(ENV['BUNDLE_GEMFILE']).basename(".gemfile").to_s
+
+require File.expand_path("../../spec/dummy-#{version}/config/environment", __FILE__)
 require "rspec/rails"
 require "master_data_tool"
 

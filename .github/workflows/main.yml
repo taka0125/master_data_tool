@@ -12,49 +12,76 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
     strategy:
+      fail-fast: false
+
       matrix:
         ruby:
-          - '2.6.9'
+          - 2.6
+          - 2.7
+          - 3.0
+          - 3.1
+        gemfile:
+          - rails52
+          - rails61
+          - rails70
+        exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
+          - ruby: 2.6
+            gemfile: rails70
+          - ruby: 3.0
+            gemfile: rails52
+          - ruby: 3.1
+            gemfile: rails52
     env:
+      BUNDLE_GEMFILE: /home/runner/work/master_data_tool/master_data_tool/gemfiles/${{ matrix.gemfile }}.gemfile
       DB_HOST: '127.0.0.1'
       DB_USERNAME: 'root'
       DB_PASSWORD: 'f3WpxNreVT2NgQry'
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true
+      - name: Cache vendor/bundle
+        uses: actions/cache@v1
+        id: cache_gem
+        with:
+          path: vendor/bundle
+          key: v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-
 
-    - name: Setup MySQL 5.7
-      run: >-
-        docker run -p 127.0.0.1:3306:3306 --name master-data-tool-mysql57 -e MYSQL_ROOT_PASSWORD="f3WpxNreVT2NgQry" -d mysql:5.7 \
-          mysqld \
-            --sql-mode=NO_ENGINE_SUBSTITUTION \
-            --character-set-server=latin1 \
-            --innodb-file-format=Barracuda \
-            --innodb-file-per-table=1 \
-            --innodb-large-prefix
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
 
-    - name: Wait MySQL Startup
-      timeout-minutes: 1
-      run: >-
-        until docker exec -i master-data-tool-mysql57 mysql -u root -h 127.0.0.1 -pf3WpxNreVT2NgQry --port 3306 -e "SHOW DATABASES;" ;
-        do
-          echo "..."
-          sleep 1
-        done
+      - name: Setup MySQL 5.7
+        run: >-
+          docker run -p 127.0.0.1:3306:3306 --name master-data-tool-mysql57 -e MYSQL_ROOT_PASSWORD="f3WpxNreVT2NgQry" -d mysql:5.7 \
+            mysqld \
+              --sql-mode=NO_ENGINE_SUBSTITUTION \
+              --character-set-server=latin1 \
+              --innodb-file-format=Barracuda \
+              --innodb-file-per-table=1 \
+              --innodb-large-prefix
 
-    - name: Setup DB
-      run: |
-        cd spec/dummy
-        RAILS_ENV=test bundle exec rake db:create
-        RAILS_ENV=test bundle exec rake db:migrate
+      - name: Wait MySQL Startup
+        timeout-minutes: 1
+        run: >-
+          until docker exec -i master-data-tool-mysql57 mysql -u root -h 127.0.0.1 -pf3WpxNreVT2NgQry --port 3306 -e "SHOW DATABASES;" ;
+          do
+            echo "..."
+            sleep 1
+          done
 
-    - name: Run tests
-      run: bundle exec rspec
+      - name: Setup DB
+        run: |
+          cd spec/dummy-${{ matrix.gemfile }}
+          RAILS_ENV=test bundle exec rake db:create
+          RAILS_ENV=test bundle exec rake db:migrate
+        continue-on-error: ${{ matrix.allow_failures == 'true' }}
+
+      - name: Run tests
+        run: bundle exec rspec
+        continue-on-error: ${{ matrix.allow_failures == 'true' }}
