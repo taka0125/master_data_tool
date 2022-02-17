@@ -41,15 +41,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache vendor/bundle
-        uses: actions/cache@v1
-        id: cache_gem
-        with:
-          path: vendor/bundle
-          key: v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
