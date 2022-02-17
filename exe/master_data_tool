@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'thor'
+require 'master_data_tool'
+
+environment_path = "#{Dir.pwd}/config/environment"
+require environment_path
+
+module MasterDataTool
+  class CLI < Thor
+    option :dry_run, default: true, type: :boolean
+    option :verify, default: true, type: :boolean
+    option :only_import_tables, default: [], type: :array
+    option :only_verify_tables, default: [], type: :array
+    option :skip_no_change, default: true, type: :boolean
+    desc 'import', 'import'
+    def import
+      dry_run = options[:dry_run]
+      verify = options[:verify]
+      only_import_tables = options[:only_import_tables]
+      only_verify_tables = options[:only_verify_tables]
+      skip_no_change = options[:skip_no_change]
+
+      executor = MasterDataTool::Import::Executor.new(
+        dry_run: dry_run,
+        verify: verify,
+        only_import_tables: only_import_tables,
+        only_verify_tables: only_verify_tables,
+        skip_no_change: skip_no_change
+      )
+      executor.execute
+    end
+
+    option :ignore_empty_table, default: true, type: :boolean
+    option :ignore_tables, default: [], type: :array
+    option :ignore_column_names, default: [], type: :array
+    option :verbose, default: false, type: :boolean
+    desc 'dump', 'dump'
+    def dump
+      ignore_empty_table = options[:ignore_empty_table]
+      ignore_tables = options[:ignore_tables]
+      ignore_column_names = options[:ignore_column_names]
+      verbose = options[:verbose]
+
+      executor = MasterDataTool::Dump::Executor.new(
+        ignore_empty_table: ignore_empty_table,
+        ignore_tables: ignore_tables,
+        ignore_column_names: ignore_column_names,
+        verbose: verbose
+      )
+      executor.execute
+    end
+  end
+end
+
+MasterDataTool::CLI.start(ARGV)

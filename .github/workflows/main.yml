@@ -1,0 +1,60 @@
+name: Ruby
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }}
+    strategy:
+      matrix:
+        ruby:
+          - '2.6.9'
+    env:
+      DB_HOST: '127.0.0.1'
+      DB_USERNAME: 'root'
+      DB_PASSWORD: 'f3WpxNreVT2NgQry'
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+
+    - name: Setup MySQL 5.7
+      run: >-
+        docker run -p 127.0.0.1:3306:3306 --name master-data-tool-mysql57 -e MYSQL_ROOT_PASSWORD="f3WpxNreVT2NgQry" -d mysql:5.7 \
+          mysqld \
+            --sql-mode=NO_ENGINE_SUBSTITUTION \
+            --character-set-server=latin1 \
+            --innodb-file-format=Barracuda \
+            --innodb-file-per-table=1 \
+            --innodb-large-prefix
+
+    - name: Wait MySQL Startup
+      timeout-minutes: 1
+      run: >-
+        until docker exec -i master-data-tool-mysql57 mysql -u root -h 127.0.0.1 -pf3WpxNreVT2NgQry --port 3306 -e "SHOW DATABASES;" ;
+        do
+          echo "..."
+          sleep 1
+        done
+
+    - name: Setup DB
+      run: |
+        cd spec/dummy
+        RAILS_ENV=test bundle exec rake db:create
+        RAILS_ENV=test bundle exec rake db:migrate
+
+    - name: Run tests
+      run: bundle exec rspec
