@@ -7,11 +7,6 @@ module MasterDataTool
 
       attr_reader :reports
 
-      def initialize(master_data)
-        super(master_data)
-        @reports = {}
-      end
-
       def print(printer)
         reports.each do |_, report|
           if report.is_a?(Array)
