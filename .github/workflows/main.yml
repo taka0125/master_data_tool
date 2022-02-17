@@ -12,17 +12,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: ${{ matrix.ruby }}
-    name: Ruby ${{ matrix.ruby }}
     strategy:
       fail-fast: false
 
       matrix:
         ruby:
-          - ruby:2.6
-          - ruby:2.7
-          - ruby:3.0
-          - ruby:3.1
+          - 2.6
+          - 2.7
+          - 3.0
+          - 3.1
         gemfile:
           - rails52
           - rails61
@@ -51,6 +49,12 @@ jobs:
           key: v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-${{ github.sha }}
           restore-keys: |
             v1-gem-${{ runner.os }}-${{ env.RBENV_VERSION }}-
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
 
       - name: bundle update
         run: |
