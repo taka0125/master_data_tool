@@ -33,7 +33,7 @@ jobs:
           - ruby: 3.1
             gemfile: rails52
     env:
-      BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
+      BUNDLE_GEMFILE: /home/runner/work/master_data_tool/master_data_tool/gemfiles/${{ matrix.gemfile }}.gemfile
       DB_HOST: '127.0.0.1'
       DB_USERNAME: 'root'
       DB_PASSWORD: 'f3WpxNreVT2NgQry'
@@ -56,12 +56,9 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - name: bundle update
-        run: |
-          set -xe
-          bundle config path vendor/bundle
-          bundle update --jobs $(nproc) --retry 3
-        continue-on-error: ${{ matrix.allow_failures == 'true' }}
+      - name: debug
+        run: >-
+          echo $HOME
 
       - name: Setup MySQL 5.7
         run: >-
