@@ -161,6 +161,12 @@ export DB_PASSWORD=
 - dockerでMySQLを立ち上げるたびにポートは変わるのでDB_PORTは都度設定する
   - direnvを使っているならば `direnv reload` すればいい
 
+```
+cd spec/dummy-rails52/
+RAILS_ENV=test bundle exec rake db:create
+RAILS_ENV=test bundle exec rake db:migrate
+```
+
 ## rspec
 
 ```
