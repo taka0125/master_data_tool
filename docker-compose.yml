@@ -1,0 +1,19 @@
+version: '3.9'
+
+x-mysql: &mysql
+  image: mysql:5.7
+  container_name: master_data_tool_mysql57
+  environment:
+    MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+  platform: linux/x86_64
+  ports:
+    - 127.0.0.1::3306
+  volumes:
+    - mysql:/var/lib/mysql
+
+services:
+  mysql:
+    <<: *mysql
+
+volumes:
+  mysql:

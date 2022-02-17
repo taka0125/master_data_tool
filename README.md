@@ -141,6 +141,27 @@ grep 'operation:import' /tmp/dry-run.txt | grep 'label:detail' | grep 'status:ne
 
 - upsert_allに移行する
 
+## Test
+
+docker-composeでMySQLを立ち上げてテストを実行する。
+
+```
+docker-compose up -d
+```
+
+以下のENVを設定すること。
+
+```
+export DB_HOST=127.0.0.1
+export DB_PORT=`docker port master_data_tool_mysql57 3306 | cut -f 2 -d ':'`
+export DB_USERNAME=root
+export DB_PASSWORD=
+```
+
+- dockerでMySQLを立ち上げるたびにポートは変わるのでDB_PORTは都度設定する
+  - direnvを使っているならば `direnv reload` すればいい
+
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/taka0125/master_data_tool.
