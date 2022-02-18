@@ -49,7 +49,12 @@ module MasterDataTool
         ignore_column_names: ignore_column_names,
         verbose: verbose
       )
-      executor.execute
+      errors = executor.execute
+      
+      return if errors.empty?
+
+      message = errors.map { |error| "table:#{error.table}\tmessage:#{error.exception.message}" }.join("\n")
+      raise message
     end
   end
 end
