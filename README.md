@@ -165,17 +165,15 @@ export DB_NAME=master_data_tool_test
   - direnvを使っているならば `direnv reload` すればいい
 
 ```
-cd spec/dummy-rails52/
-RAILS_ENV=test bundle exec rake db:create
-RAILS_ENV=test bundle exec rake db:migrate
+./scripts/setup.sh
 ```
 
 ## rspec
 
 ```
-bundle exec appraisal rails52 rspec
-bundle exec appraisal rails61 rspec
-bundle exec appraisal rails70 rspec
+bundle exec appraisal activerecord52 rspec
+bundle exec appraisal activerecord61 rspec
+bundle exec appraisal activerecord70 rspec
 ```
 
 
