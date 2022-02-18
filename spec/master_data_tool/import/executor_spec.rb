@@ -9,6 +9,7 @@ RSpec.describe MasterDataTool::Import::Executor do
         only_import_tables: only_import_tables,
         only_verify_tables: only_verify_tables,
         skip_no_change: skip_no_change,
+        silent: true,
         report_printer: DebugPrinter.new(StringIO.new)
       )
     end

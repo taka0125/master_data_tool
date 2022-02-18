@@ -14,6 +14,7 @@ module MasterDataTool
     option :only_import_tables, default: [], type: :array
     option :only_verify_tables, default: [], type: :array
     option :skip_no_change, default: true, type: :boolean
+    option :silent, default: false, type: :boolean
     desc 'import', 'import'
     def import
       dry_run = options[:dry_run]
@@ -21,13 +22,15 @@ module MasterDataTool
       only_import_tables = options[:only_import_tables]
       only_verify_tables = options[:only_verify_tables]
       skip_no_change = options[:skip_no_change]
+      silent = options[:silent]
 
       executor = MasterDataTool::Import::Executor.new(
         dry_run: dry_run,
         verify: verify,
         only_import_tables: only_import_tables,
         only_verify_tables: only_verify_tables,
-        skip_no_change: skip_no_change
+        skip_no_change: skip_no_change,
+        silent: silent
       )
       executor.execute
     end
@@ -50,7 +53,7 @@ module MasterDataTool
         verbose: verbose
       )
       errors = executor.execute
-      
+
       return if errors.empty?
 
       message = errors.map { |error| "table:#{error.table}\tmessage:#{error.exception.message}" }.join("\n")
