@@ -4,7 +4,7 @@ x-mysql: &mysql
   image: mysql:5.7
   container_name: master_data_tool_mysql57
   environment:
-    MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    MYSQL_ROOT_PASSWORD: 'f3WpxNreVT2NgQry'
   platform: linux/x86_64
   ports:
     - 127.0.0.1::3306

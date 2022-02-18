@@ -1,15 +1,12 @@
 # frozen_string_literal: true
 
-ENV["RAILS_ENV"] ||= "test"
-version = Pathname.new(ENV['BUNDLE_GEMFILE']).basename(".gemfile").to_s
+require 'master_data_tool'
+require 'database_cleaner/active_record'
+require_relative 'activerecord_helper'
 
-require File.expand_path("../../spec/dummy-#{version}/config/environment", __FILE__)
-require "rspec/rails"
-require "master_data_tool"
+ENV['RAILS_ENV'] ||= 'test'
 
 RSpec.configure do |config|
-  config.use_transactional_fixtures = true
-
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
 
@@ -18,6 +15,17 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
   end
 end
 
@@ -32,3 +40,20 @@ class DebugPrinter
     @io.puts message
   end
 end
+
+MasterDataTool.configure do |config|
+  config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')
+end
+
+create_database_if_not_exists(env: ENV['RAILS_ENV'])
+
+Time.zone = 'Tokyo'
+ActiveRecord::Base.establish_connection(DATABASE_CONFIG[ENV['RAILS_ENV']])
+ActiveRecord::Base.time_zone_aware_attributes = true
+
+require DUMMY_APP_ROOT.join('app/models/application_record.rb')
+DUMMY_APP_ROOT.glob('app/models/**/*.rb').each do |f|
+  require f
+end
+
+# bundle exec ridgepole -c spec/dummy-common/config/database.yml --apply -f spec/dummy-common/db/Schemafile -E test

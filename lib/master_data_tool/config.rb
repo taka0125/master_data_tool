@@ -11,10 +11,10 @@ module MasterDataTool
 
     def self.default_config
       new.tap do |config|
-        config.master_data_dir = Rails.root.join('db/fixtures')
+        config.master_data_dir = nil # Rails.root.join('db/fixtures')
         config.dump_ignore_tables = %w[]
         config.dump_ignore_columns = %w[]
-        config.logger = Rails.logger
+        config.logger = Logger.new(nil)
       end
     end
   end

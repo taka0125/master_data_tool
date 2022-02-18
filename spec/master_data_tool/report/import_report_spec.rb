@@ -10,7 +10,7 @@ RSpec.describe MasterDataTool::Report::ImportReport do
 
     before do
       MasterDataTool.configure do |config|
-        config.master_data_dir = Rails.root.join('db/fixtures')
+        config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')
       end
     end
 
@@ -44,7 +44,7 @@ operation:import	label:detail	table_name:tags	status:new	id:2
 
       it 'レポートが表示される' do
         MasterDataTool.configure do |config|
-          config.master_data_dir = Rails.root.join('db/fixtures/import_report_spec/new')
+          config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures/import_report_spec/new')
         end
         master_data.load
 
@@ -73,7 +73,7 @@ operation:import	label:detail	table_name:tags	status:no_change	id:2
 
       it 'レポートが表示される' do
         MasterDataTool.configure do |config|
-          config.master_data_dir = Rails.root.join('db/fixtures/import_report_spec/delete')
+          config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures/import_report_spec/delete')
         end
         master_data.load
 
@@ -101,7 +101,7 @@ operation:import	label:detail	table_name:tags	status:deleted	id:1
 
       it 'レポートが表示される' do
         MasterDataTool.configure do |config|
-          config.master_data_dir = Rails.root.join('db/fixtures/import_report_spec/update')
+          config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures/import_report_spec/update')
         end
         master_data.load
 
