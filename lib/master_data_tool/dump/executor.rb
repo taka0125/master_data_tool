@@ -39,7 +39,7 @@ module MasterDataTool
       end
 
       def dump_to_csv(table)
-        model_klass = Rails.const_get(table.classify)
+        model_klass = Object.const_get(table.classify)
         if ignore?(model_klass)
           print_message "[ignore] #{table}"
 

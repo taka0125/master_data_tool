@@ -22,21 +22,24 @@ jobs:
           - 3.0
           - 3.1
         gemfile:
-          - rails52
-          - rails61
-          - rails70
+          - activerecord52
+          - activerecord61
+          - activerecord70
         exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
           - ruby: 2.6
-            gemfile: rails70
+            gemfile: activerecord70
           - ruby: 3.0
-            gemfile: rails52
+            gemfile: activerecord52
           - ruby: 3.1
-            gemfile: rails52
+            gemfile: activerecord52
     env:
+      RAILS_ENV: 'test'
       BUNDLE_GEMFILE: /home/runner/work/master_data_tool/master_data_tool/gemfiles/${{ matrix.gemfile }}.gemfile
       DB_HOST: '127.0.0.1'
       DB_USERNAME: 'root'
       DB_PASSWORD: 'f3WpxNreVT2NgQry'
+      DB_NAME: 'master_data_tool_test'
+      DB_PORT: 3306
 
     steps:
       - uses: actions/checkout@v2
@@ -68,9 +71,7 @@ jobs:
 
       - name: Setup DB
         run: |
-          cd spec/dummy-${{ matrix.gemfile }}
-          RAILS_ENV=test bundle exec rake db:create
-          RAILS_ENV=test bundle exec rake db:migrate
+          ./scripts/setup.sh
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
       - name: Run tests

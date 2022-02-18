@@ -40,7 +40,7 @@ module MasterDataTool
             table_name = MasterDataTool.resolve_table_name(path)
             load_skip = load_skip_table?(table_name, path)
 
-            model_klass = Rails.const_get(table_name.classify)
+            model_klass = Object.const_get(table_name.classify)
             master_data = MasterData.new(path, model_klass)
             master_data.load unless load_skip
 

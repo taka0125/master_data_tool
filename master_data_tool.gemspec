@@ -27,12 +27,15 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency 'rspec-rails'
+  spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'psych', '~> 3.1'
   spec.add_development_dependency 'appraisal'
+  spec.add_development_dependency 'ridgepole'
+  spec.add_development_dependency 'database_cleaner-active_record'
 
-  spec.add_dependency 'rails', '>= 5.1.7'
+  spec.add_dependency 'activerecord', '>= 5.1.7'
+  spec.add_dependency 'activesupport'
   spec.add_dependency 'thor'
   spec.add_dependency 'activerecord-import'
 end

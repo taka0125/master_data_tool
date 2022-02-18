@@ -25,7 +25,7 @@ RSpec.describe MasterDataTool::Import::Executor do
 
     before do
       MasterDataTool.configure do |config|
-        config.master_data_dir = Rails.root.join(master_data_dir)
+        config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
       end
     end
 

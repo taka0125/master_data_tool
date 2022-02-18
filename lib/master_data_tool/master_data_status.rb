@@ -2,6 +2,7 @@
 
 require 'active_record'
 require 'activerecord-import'
+require 'openssl'
 
 module MasterDataTool
   class MasterDataStatus < ::ActiveRecord::Base
