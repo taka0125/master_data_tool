@@ -2,7 +2,7 @@
 
 require 'master_data_tool'
 require 'database_cleaner/active_record'
-require_relative 'activerecord_helper'
+require 'standalone_activerecord_boot_loader'
 
 ENV['RAILS_ENV'] ||= 'test'
 
@@ -41,19 +41,14 @@ class DebugPrinter
   end
 end
 
+DUMMY_APP_ROOT = Pathname.new(__dir__).join('dummy-common')
+
 MasterDataTool.configure do |config|
   config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')
 end
 
-create_database_if_not_exists(env: ENV['RAILS_ENV'])
-
-Time.zone = 'Tokyo'
-ActiveRecord::Base.establish_connection(DATABASE_CONFIG[ENV['RAILS_ENV']])
-ActiveRecord::Base.time_zone_aware_attributes = true
-
-require DUMMY_APP_ROOT.join('app/models/application_record.rb')
-DUMMY_APP_ROOT.glob('app/models/**/*.rb').each do |f|
-  require f
-end
-
-# bundle exec ridgepole -c spec/dummy-common/config/database.yml --apply -f spec/dummy-common/db/Schemafile -E test
+instance = StandaloneActiverecordBootLoader::Instance.new(
+  DUMMY_APP_ROOT,
+  env: ENV['RAILS_ENV']
+)
+instance.execute
