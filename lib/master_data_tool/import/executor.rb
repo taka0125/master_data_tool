@@ -3,8 +3,6 @@
 module MasterDataTool
   module Import
     class Executor
-      OptionEvaluationResult = Struct.new(:evaluated, :result)
-
       def initialize(dry_run: true,
                      verify: true,
                      only_import_tables: [],
