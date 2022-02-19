@@ -41,7 +41,7 @@ class DebugPrinter
   end
 end
 
-DUMMY_APP_ROOT = Pathname.new(__dir__).join('dummy-common')
+DUMMY_APP_ROOT = Pathname.new(__dir__).join('dummy')
 
 MasterDataTool.configure do |config|
   config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')

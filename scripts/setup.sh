@@ -11,7 +11,7 @@ mysql \
   -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 
 bundle exec ridgepole \
-  -c ${CURRENT}/../spec/dummy-common/config/database.yml \
+  -c ${CURRENT}/../spec/dummy/config/database.yml \
   --apply \
-  -f ${CURRENT}/../spec/dummy-common/db/Schemafile \
+  -f ${CURRENT}/../spec/dummy/db/Schemafile \
   -E test

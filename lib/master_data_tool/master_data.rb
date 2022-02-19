@@ -117,12 +117,12 @@ module MasterDataTool
       end
     end
 
-    def verify!(dry_run: true)
+    def verify!(ignore_fail: false)
       MasterDataTool::Report::VerifyReport.new(self).tap do |report|
-        @model_klass.all.find_each do |record|
+        @model_klass.order(id: :asc).all.find_each do |record|
           valid = record.valid?
           report.append(MasterDataTool::Report::VerifyReport.build_verify_record_report(self, record, valid))
-          next if dry_run
+          next if ignore_fail
 
           raise MasterDataTool::VerifyFailed.new("[#{table_name}] id = #{record.id} is invalid") unless valid
         end
