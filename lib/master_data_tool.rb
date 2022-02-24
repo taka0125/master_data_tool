@@ -25,7 +25,8 @@ module MasterDataTool
     end
 
     def resolve_table_name(csv_path)
-      csv_path.relative_path_from(config.master_data_dir).to_s.delete_suffix('.csv')
+      # 0001_table_nameのように投入順序を制御可能にする
+      csv_path.relative_path_from(config.master_data_dir).to_s.gsub(/^\d+_/, '').delete_suffix('.csv')
     end
   end
 end

@@ -57,7 +57,7 @@ module MasterDataTool
 
             master_data_list << master_data
           end
-        end
+        end.sort_by { |m| m.csv_path } # 外部キー制約などがある場合には先に入れておかないといけないデータなどがある。なので、プレフィックスを付けて順序を指定して貰う
       end
 
       def import_all!(master_data_list)
