@@ -11,6 +11,7 @@ module MasterDataTool
                      except_verify_tables: [],
                      skip_no_change: true,
                      silent: false,
+                     delete_all_ignore_foreign_key: false,
                      report_printer: MasterDataTool::Report::DefaultPrinter.new)
 
         @dry_run = dry_run
@@ -21,12 +22,15 @@ module MasterDataTool
         @except_verify_tables = Array(except_verify_tables)
         @skip_no_change = skip_no_change
         @silent = silent
+        @delete_all_ignore_foreign_key = delete_all_ignore_foreign_key
         @report_printer = report_printer
         @report_printer.silent = silent
       end
 
       def execute
         ApplicationRecord.transaction do
+          print_execute_options
+
           master_data_list = build_master_data_list
 
           import_all!(master_data_list)
@@ -44,6 +48,14 @@ module MasterDataTool
       end
 
       private
+
+      def print_execute_options
+        puts "==== execute ===="
+        instance_variables.each do |k|
+          puts "#{k}: #{instance_variable_get(k)}"
+        end
+        puts "================="
+      end
 
       def build_master_data_list
         [].tap do |master_data_list|
@@ -65,7 +77,7 @@ module MasterDataTool
           next unless master_data.loaded?
           next if import_skip_table?(master_data.table_name)
 
-          report = master_data.import!(dry_run: @dry_run)
+          report = master_data.import!(dry_run: @dry_run, delete_all_ignore_foreign_key: @delete_all_ignore_foreign_key)
           report.print(@report_printer)
         end
       end

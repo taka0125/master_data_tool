@@ -45,6 +45,7 @@ Or install it yourself as:
 | --except-verify-tables | [] | 指定したテーブルのバリデーションチェックを行わない         |
 | --skip-no-change     | true | CSVファイルに更新がないテーブルをスキップする          |
 | --silent | false | 結果の出力をやめる                         |
+| --delete-all-ignore-foreign-key | false | 外部キー制約を無視してレコードを消すかどうか |
 
 ```bash
 bundle exec master_data_tool import
@@ -61,7 +62,8 @@ bundle exec thor master_data_tool import \
   --only-verify-tables="" \
   --except-verify-tables="" \
   --skip-no-change=true \
-  --silent=false
+  --silent=false \
+  --delete-all-ignore-foreign-key=false
 ```
 
 ### ダンプ

@@ -9,35 +9,19 @@ require environment_path
 
 module MasterDataTool
   class CLI < Thor
-    option :dry_run, default: true, type: :boolean
-    option :verify, default: true, type: :boolean
-    option :only_import_tables, default: [], type: :array
-    option :except_import_tables, default: [], type: :array
-    option :only_verify_tables, default: [], type: :array
-    option :except_verify_tables, default: [], type: :array
-    option :skip_no_change, default: true, type: :boolean
-    option :silent, default: false, type: :boolean
+    option :dry_run, default: nil, type: :boolean
+    option :verify, default: nil, type: :boolean
+    option :only_import_tables, default: nil, type: :array
+    option :except_import_tables, default: nil, type: :array
+    option :only_verify_tables, default: nil, type: :array
+    option :except_verify_tables, default: nil, type: :array
+    option :skip_no_change, default: nil, type: :boolean
+    option :silent, default: nil, type: :boolean
+    option :delete_all_ignore_foreign_key, default: nil, type: :boolean
     desc 'import', 'import'
     def import
-      dry_run = options[:dry_run]
-      verify = options[:verify]
-      only_import_tables = options[:only_import_tables]
-      except_import_tables = options[:except_import_tables]
-      only_verify_tables = options[:only_verify_tables]
-      except_verify_tables = options[:except_verify_tables]
-      skip_no_change = options[:skip_no_change]
-      silent = options[:silent]
-
-      executor = MasterDataTool::Import::Executor.new(
-        dry_run: dry_run,
-        verify: verify,
-        only_import_tables: only_import_tables,
-        except_import_tables: except_import_tables,
-        only_verify_tables: only_verify_tables,
-        except_verify_tables: except_verify_tables,
-        skip_no_change: skip_no_change,
-        silent: silent
-      )
+      new_options = MasterDataTool.config.default_import_options.with_indifferent_access.merge(options)
+      executor = MasterDataTool::Import::Executor.new(**new_options.symbolize_keys)
       executor.execute
     end
 
