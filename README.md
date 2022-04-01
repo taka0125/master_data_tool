@@ -68,12 +68,13 @@ bundle exec thor master_data_tool import \
 
 ### ダンプ
 
-| option                | default | 内容            |
-|-----------------------|---------|---------------|
-| --ignore-empty-table  | true    | 空のテーブルを無視する   |
-| --ignore-tables       | []      | 指定したテーブルを無視する |
-| --ignore-column-names | []      | 指定したカラムを無視する  |
-| --verbose      | false   | 詳細表示          |
+| option                | default | 内容              |
+|-----------------------|---------|-----------------|
+| --ignore-empty-table  | true    | 空のテーブルを無視する     |
+| --ignore-tables       | []      | 指定したテーブルを無視する   |
+| --ignore-column-names | []      | 指定したカラムを無視する    |
+| --only-tables | nil     | 指定したテーブルのみダンプする |
+| --verbose      | false   | 詳細表示            |
 
 ```bash
 bundle exec master_data_tool dump
@@ -86,6 +87,7 @@ bundle exec master_data_tool dump \
   --ignore-empty-table=true \
   --ignore-tables="" \
   --ignore-column-names="" \
+  --only-tables="" \
   --verbose=false
 ```
 
