@@ -6,6 +6,8 @@ module MasterDataTool
       include Printer
 
       def print(message)
+        return if @silent
+
         MasterDataTool.config.logger.info message
         puts message
       end
