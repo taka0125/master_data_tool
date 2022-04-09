@@ -76,6 +76,10 @@ jobs:
           SET GLOBAL innodb_large_prefix = ON;
           SQL
 
+      - name: set ENV
+        run: |
+          echo "DB_PORT=${{ job.services.mysql.ports[3306] }}" >> $GITHUB_ENV
+
       - name: Setup DB
         run: |
           ./scripts/setup.sh
