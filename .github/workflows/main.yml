@@ -53,10 +53,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+
     env:
       BUNDLE_GEMFILE: /home/runner/work/master_data_tool/master_data_tool/gemfiles/${{ matrix.gemfile }}.gemfile
       DB_HOST: 127.0.0.1
-      DB_PORT: ${{ job.services.mysql.ports[3306] }}
 
     steps:
       - uses: actions/checkout@v2
