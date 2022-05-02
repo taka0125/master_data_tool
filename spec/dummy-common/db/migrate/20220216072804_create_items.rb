@@ -1,4 +1,4 @@
-class CreateItems < ActiveRecord::Migration[5.2]
+class CreateItems < ActiveRecord::Migration
   def self.up
     create_table :items do |t|
       t.string :field1, limit: 255, null: false

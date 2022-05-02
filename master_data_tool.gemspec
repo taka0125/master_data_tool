@@ -28,9 +28,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency 'rspec-rails'
-  spec.add_development_dependency 'rails', '5.2.6.2'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'psych', '~> 3.1'
+  spec.add_development_dependency 'appraisal'
 
   spec.add_dependency 'rails', '>= 5.1.7'
   spec.add_dependency 'thor'

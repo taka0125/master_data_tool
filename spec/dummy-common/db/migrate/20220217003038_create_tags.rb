@@ -1,4 +1,4 @@
-class CreateTags < ActiveRecord::Migration[5.2]
+class CreateTags < ActiveRecord::Migration
   def self.up
     create_table :tags do |t|
       t.string :name, limit: 255, null: false

@@ -1,4 +1,4 @@
-class CreateMasterDataStatuses < ActiveRecord::Migration[5.2]
+class CreateMasterDataStatuses < ActiveRecord::Migration
   def self.up
     create_table :master_data_statuses do |t|
       t.string :name, limit: 255, null: false, comment: 'テーブル名'
