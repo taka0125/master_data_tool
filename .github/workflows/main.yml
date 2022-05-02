@@ -26,11 +26,11 @@ jobs:
           - rails61
           - rails70
         exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
-          - ruby: ruby:2.6
+          - ruby: 2.6
             gemfile: rails70
-          - ruby: ruby:3.0
+          - ruby: 3.0
             gemfile: rails52
-          - ruby: ruby:3.1
+          - ruby: 3.1
             gemfile: rails52
     env:
       BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
@@ -84,7 +84,7 @@ jobs:
 
       - name: Setup DB
         run: |
-          cd spec/dummy
+          cd spec/dummy-${{ matrix.gemfile }}
           RAILS_ENV=test bundle exec rake db:create
           RAILS_ENV=test bundle exec rake db:migrate
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
