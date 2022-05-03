@@ -50,6 +50,8 @@ module MasterDataTool
       private
 
       def print_execute_options
+        return if @silent
+
         puts "==== execute ===="
         instance_variables.each do |k|
           puts "#{k}: #{instance_variable_get(k)}"
