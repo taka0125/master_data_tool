@@ -12,6 +12,7 @@ module MasterDataTool
                      skip_no_change: true,
                      silent: false,
                      delete_all_ignore_foreign_key: false,
+                     override_identifier: nil,
                      report_printer: MasterDataTool::Report::DefaultPrinter.new)
 
         @dry_run = dry_run
@@ -23,6 +24,7 @@ module MasterDataTool
         @skip_no_change = skip_no_change
         @silent = silent
         @delete_all_ignore_foreign_key = delete_all_ignore_foreign_key
+        @override_identifier = override_identifier
         @report_printer = report_printer
         @report_printer.silent = silent
       end
@@ -61,17 +63,16 @@ module MasterDataTool
 
       def build_master_data_list
         [].tap do |master_data_list|
-          extract_master_data_csv_paths.each do |path|
-            table_name = MasterDataTool.resolve_table_name(path)
-            load_skip = load_skip_table?(table_name, path)
+          MasterDataTool::Import::MasterDataFileList.new(override_identifier: @override_identifier).build.each do |master_data_file|
+            load_skip = load_skip_table?(master_data_file)
 
-            model_klass = Object.const_get(table_name.classify)
-            master_data = MasterData.new(path, model_klass)
+            model_klass = Object.const_get(master_data_file.table_name.classify)
+            master_data = MasterData.new(master_data_file, model_klass)
             master_data.load unless load_skip
 
             master_data_list << master_data
           end
-        end.sort_by { |m| m.csv_path } # 外部キー制約などがある場合には先に入れておかないといけないデータなどがある。なので、プレフィックスを付けて順序を指定して貰う
+        end.sort_by { |m| m.basename } # 外部キー制約などがある場合には先に入れておかないといけないデータなどがある。なので、プレフィックスを付けて順序を指定して貰う
       end
 
       def import_all!(master_data_list)
@@ -98,7 +99,7 @@ module MasterDataTool
         master_data_list.each do |master_data|
           next unless master_data.loaded?
 
-          records << MasterDataTool::MasterDataStatus.build(master_data.csv_path)
+          records << MasterDataTool::MasterDataStatus.build(master_data.master_data_file)
         end
 
         MasterDataTool::MasterDataStatus.import_records!(records, dry_run: @dry_run)
@@ -114,11 +115,11 @@ module MasterDataTool
         end
       end
 
-      def load_skip_table?(table_name, csv_path)
-        return true if import_skip_table?(table_name)
+      def load_skip_table?(master_data_file)
+        return true if import_skip_table?(master_data_file.table_name)
         return false unless @skip_no_change
 
-        !MasterDataTool::MasterDataStatus.master_data_will_change?(csv_path)
+        !MasterDataTool::MasterDataStatus.master_data_will_change?(master_data_file)
       end
 
       def import_skip_table?(table_name)
@@ -146,6 +147,13 @@ module MasterDataTool
 
       def extract_master_data_csv_paths
         pattern = Pathname.new(MasterDataTool.config.master_data_dir).join('*.csv').to_s
+        Pathname.glob(pattern).select(&:file?)
+      end
+
+      def overridden_master_data_csv_paths
+        return [] unless @override_identifier
+
+        pattern = Pathname.new(MasterDataTool.config.master_data_dir).join(@override_identifier).join('*.csv').to_s
         Pathname.glob(pattern).select(&:file?)
       end
     end

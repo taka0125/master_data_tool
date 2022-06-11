@@ -2,11 +2,12 @@
 
 module MasterDataTool
   class MasterData
-    attr_reader :csv_path, :model_klass, :columns, :new_records, :updated_records, :no_change_records, :deleted_records
+    attr_reader :master_data_file, :model_klass, :columns, :new_records, :updated_records, :no_change_records, :deleted_records
     attr_reader :before_count, :after_count
 
-    def initialize(csv_path, model_klass)
-      @csv_path = csv_path
+    # @param [MasterDataTool::MasterDataFile] master_data_file
+    def initialize(master_data_file, model_klass)
+      @master_data_file = master_data_file
       @model_klass = model_klass
 
       @loaded = false
@@ -18,8 +19,12 @@ module MasterDataTool
       @deleted_records = []
     end
 
+    def basename
+      @master_data_file.basename
+    end
+
     def load
-      csv = CSV.read(@csv_path, headers: true, skip_blanks: true)
+      csv = CSV.read(@master_data_file.path, headers: true, skip_blanks: true)
       old_records_by_id = @model_klass.all.index_by(&:id)
 
       csv_records_by_id = build_records_from_csv(csv, old_records_by_id)

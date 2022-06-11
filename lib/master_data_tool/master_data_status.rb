@@ -15,9 +15,9 @@ module MasterDataTool
               presence: true
 
     class << self
-      def build(csv_path)
-        version = decide_version(csv_path)
-        new(name: MasterDataTool.resolve_table_name(csv_path), version: version)
+      def build(master_data_file)
+        version = decide_version(master_data_file.path)
+        new(name: MasterDataTool.resolve_table_name(master_data_file.path, master_data_file.override_identifier), version: version)
       end
 
       def import_records!(records, dry_run: true)
@@ -28,9 +28,10 @@ module MasterDataTool
         end
       end
 
-      def master_data_will_change?(csv_path)
-        new_version = decide_version(csv_path)
-        !where(name: MasterDataTool.resolve_table_name(csv_path), version: new_version).exists?
+      # @param [MasterDataTool::MasterDataFile] master_data_file
+      def master_data_will_change?(master_data_file)
+        new_version = decide_version(master_data_file.path)
+        !where(name: master_data_file.table_name, version: new_version).exists?
       end
 
       def decide_version(csv_path)

@@ -2,7 +2,8 @@
 
 RSpec.describe MasterDataTool::Report::PrintAffectedTableReport do
   describe '#print' do
-    let(:master_data) { MasterDataTool::MasterData.new(MasterDataTool.config.master_data_dir.join('items.csv'), Item) }
+    let(:master_data_file) { MasterDataTool::MasterDataFile.new('items', MasterDataTool.config.master_data_dir.join('items.csv'), nil) }
+    let(:master_data) { MasterDataTool::MasterData.new(master_data_file, Item) }
     let(:io) { StringIO.new }
 
     subject { master_data.print_affected_table&.print(DebugPrinter.new(io)) }

@@ -13,6 +13,7 @@ RSpec.describe MasterDataTool::Import::Executor do
         skip_no_change: skip_no_change,
         silent: true,
         delete_all_ignore_foreign_key: delete_all_ignore_foreign_key,
+        override_identifier: override_identifier,
         report_printer: DebugPrinter.new(StringIO.new)
       )
     end
@@ -26,6 +27,7 @@ RSpec.describe MasterDataTool::Import::Executor do
     let(:except_verify_tables) { [] }
     let(:skip_no_change) { true }
     let(:delete_all_ignore_foreign_key) { false }
+    let(:override_identifier) {}
 
     let(:master_data_dir) { 'db/fixtures' }
 
@@ -225,6 +227,18 @@ RSpec.describe MasterDataTool::Import::Executor do
           expect(Tag.count).to eq 3
           expect(Tagging.count).to eq 4
         end
+      end
+    end
+
+    context 'override_identifierオプション' do
+      let(:master_data_dir) { 'db/fixtures/override_spec' }
+      let(:override_identifier) { 'sample' }
+
+      it 'tagsだけsampleディレクトリのデータが使われる' do
+        subject
+
+        expect(Item.count).to eq 3
+        expect(Tag.count).to eq 4
       end
     end
   end
