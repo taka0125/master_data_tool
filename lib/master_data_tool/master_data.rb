@@ -19,6 +19,15 @@ module MasterDataTool
       @deleted_records = []
     end
 
+    class << self
+      def build(master_data_file, load: false)
+        model_klass = Object.const_get(master_data_file.table_name.classify)
+        new(master_data_file, model_klass).tap do |record|
+          record.load if load
+        end
+      end
+    end
+
     def basename
       @master_data_file.basename
     end

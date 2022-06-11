@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-RSpec.describe MasterDataTool::Import::MasterDataFileList do
+RSpec.describe MasterDataTool::MasterDataFileCollection do
   before do
     MasterDataTool.configure do |config|
       config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures/override_spec')
     end
   end
 
-  describe '#build' do
-    subject { described_class.new(override_identifier: override_identifier).build }
+  describe '#initialize' do
+    subject { described_class.new(override_identifier: override_identifier) }
 
     context 'override_identifier = nil' do
       let(:override_identifier) {}
@@ -27,7 +27,7 @@ RSpec.describe MasterDataTool::Import::MasterDataFileList do
           ),
         ].sort_by(&:basename)
 
-        expect(subject.sort_by(&:basename)).to eq expected_results
+        expect(subject.each.to_a.sort_by(&:basename)).to eq expected_results
       end
     end
 
@@ -48,7 +48,7 @@ RSpec.describe MasterDataTool::Import::MasterDataFileList do
           ),
         ].sort_by(&:basename)
 
-        expect(subject.sort_by(&:basename)).to eq expected_results
+        expect(subject.each.to_a.sort_by(&:basename)).to eq expected_results
       end
     end
   end

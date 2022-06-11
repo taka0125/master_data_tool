@@ -41,6 +41,11 @@ class DebugPrinter
   end
 end
 
+def build_master_data(path, override_identifier)
+  f = MasterDataTool::MasterDataFile.build(path, override_identifier)
+  MasterDataTool::MasterData.build(f)
+end
+
 DUMMY_APP_ROOT = Pathname.new(__dir__).join('dummy')
 
 MasterDataTool.configure do |config|
