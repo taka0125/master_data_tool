@@ -33,17 +33,17 @@ module MasterDataTool
         ApplicationRecord.transaction do
           print_execute_options
 
-          master_data_list = build_master_data_list
+          master_data_collection = build_master_data_collection
 
-          import_all!(master_data_list)
-          verify_all!(master_data_list) if @verify
-          save_master_data_statuses!(master_data_list)
+          import_all!(master_data_collection)
+          verify_all!(master_data_collection) if @verify
+          save_master_data_statuses!(master_data_collection)
 
-          print_affected_tables(master_data_list)
+          print_affected_tables(master_data_collection)
 
           raise DryRunError if @dry_run
 
-          master_data_list
+          master_data_collection
         end
       rescue DryRunError
         puts "[DryRun] end"
@@ -61,22 +61,18 @@ module MasterDataTool
         puts "================="
       end
 
-      def build_master_data_list
-        [].tap do |master_data_list|
-          MasterDataTool::Import::MasterDataFileList.new(override_identifier: @override_identifier).build.each do |master_data_file|
+      def build_master_data_collection
+        MasterDataCollection.new.tap do |collection|
+          MasterDataTool::MasterDataFileCollection.new(override_identifier: @override_identifier).each do |master_data_file|
             load_skip = load_skip_table?(master_data_file)
-
-            model_klass = Object.const_get(master_data_file.table_name.classify)
-            master_data = MasterData.new(master_data_file, model_klass)
-            master_data.load unless load_skip
-
-            master_data_list << master_data
+            master_data = MasterData.build(master_data_file, load: !load_skip)
+            collection.append(master_data)
           end
-        end.sort_by { |m| m.basename } # 外部キー制約などがある場合には先に入れておかないといけないデータなどがある。なので、プレフィックスを付けて順序を指定して貰う
+        end
       end
 
-      def import_all!(master_data_list)
-        master_data_list.each do |master_data|
+      def import_all!(master_data_collection)
+        master_data_collection.each do |master_data|
           next unless master_data.loaded?
           next if import_skip_table?(master_data.table_name)
 
@@ -85,8 +81,8 @@ module MasterDataTool
         end
       end
 
-      def verify_all!(master_data_list)
-        master_data_list.each do |master_data|
+      def verify_all!(master_data_collection)
+        master_data_collection.each do |master_data|
           next if verify_skip_table?(master_data.table_name)
 
           report = master_data.verify!(ignore_fail: @dry_run)
@@ -94,9 +90,9 @@ module MasterDataTool
         end
       end
 
-      def save_master_data_statuses!(master_data_list)
+      def save_master_data_statuses!(master_data_collection)
         records = []
-        master_data_list.each do |master_data|
+        master_data_collection.each do |master_data|
           next unless master_data.loaded?
 
           records << MasterDataTool::MasterDataStatus.build(master_data.master_data_file)
@@ -105,8 +101,8 @@ module MasterDataTool
         MasterDataTool::MasterDataStatus.import_records!(records, dry_run: @dry_run)
       end
 
-      def print_affected_tables(master_data_list)
-        master_data_list.each do |master_data|
+      def print_affected_tables(master_data_collection)
+        master_data_collection.each do |master_data|
           next unless master_data.loaded?
           next unless master_data.affected?
 
