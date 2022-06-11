@@ -17,6 +17,7 @@ module MasterDataTool
     option :except_verify_tables, default: nil, type: :array
     option :skip_no_change, default: nil, type: :boolean
     option :silent, default: nil, type: :boolean
+    option :override_identifier, default: nil, type: :string
     option :delete_all_ignore_foreign_key, default: nil, type: :boolean
     desc 'import', 'import'
     def import

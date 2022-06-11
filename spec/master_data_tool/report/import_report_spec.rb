@@ -3,7 +3,8 @@
 RSpec.describe MasterDataTool::Report::ImportReport do
   describe '#print' do
     let(:report) { MasterDataTool::Report::ImportReport.new(master_data) }
-    let(:master_data) { MasterDataTool::MasterData.new(MasterDataTool.config.master_data_dir.join('tags.csv'), Tag) }
+    let(:master_data_file) { MasterDataTool::MasterDataFile.new('tags', MasterDataTool.config.master_data_dir.join('tags.csv'), nil) }
+    let(:master_data) { MasterDataTool::MasterData.new(master_data_file, Tag) }
     let(:io) { StringIO.new }
 
     subject { report.print(DebugPrinter.new(io)) }
