@@ -241,5 +241,53 @@ RSpec.describe MasterDataTool::Import::Executor do
         expect(Tag.count).to eq 4
       end
     end
+
+    # FIXME: 本当はpreloadされている事を確認したい
+    context 'preloadオプション（configureでのみ設定可）' do
+      let(:master_data_dir) { 'db/fixtures/preload_spec' }
+
+      before do
+        ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+        MasterDataTool.configure do |config|
+          config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
+          config.preload_associations = {
+            ItemTagging: [:item, :tag],
+          }
+        end
+      end
+
+      after do
+        ActiveRecord::Base.logger = nil
+      end
+
+      it 'エラーにはならない' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
+    # FIXME: 本当はpreloadされている事を確認したい
+    context 'eager_loadオプション（configureでのみ設定可）' do
+      let(:master_data_dir) { 'db/fixtures/eager_load_spec' }
+
+      before do
+        ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+        MasterDataTool.configure do |config|
+          config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
+          config.eager_load_associations = {
+            ItemTagging: [:item, :tag],
+          }
+        end
+      end
+
+      after do
+        ActiveRecord::Base.logger = nil
+      end
+
+      it 'エラーにはならない' do
+        expect { subject }.not_to raise_error
+      end
+    end
   end
 end

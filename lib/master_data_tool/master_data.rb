@@ -135,7 +135,11 @@ module MasterDataTool
 
     def verify!(ignore_fail: false)
       MasterDataTool::Report::VerifyReport.new(self).tap do |report|
-        @model_klass.all.find_each do |record|
+        scoped = @model_klass.all
+        scoped = scoped.preload(preload_associations) if preload_associations
+        scoped = scoped.eager_load(eager_load_associations) if eager_load_associations
+
+        scoped.find_each do |record|
           valid = record.valid?
           report.append(MasterDataTool::Report::VerifyReport.build_verify_record_report(self, record, valid))
           next if ignore_fail
@@ -153,6 +157,14 @@ module MasterDataTool
     end
 
     private
+
+    def preload_associations
+      @preload_associations ||= MasterDataTool.config.preload_associations.dig(@model_klass.to_s.to_sym)
+    end
+
+    def eager_load_associations
+      @eager_load_associations ||= MasterDataTool.config.eager_load_associations.dig(@model_klass.to_s.to_sym)
+    end
 
     def build_records_from_csv(csv, old_records_by_id)
       {}.tap do |records|
