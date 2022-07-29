@@ -16,3 +16,5 @@ vendor
 .envrc
 spec/dummy-*/log/*.log
 gemfiles/*.gemfile.lock
+
+docker-compose.override.yml
