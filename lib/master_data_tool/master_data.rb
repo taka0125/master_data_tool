@@ -142,9 +142,13 @@ module MasterDataTool
         scoped.find_each do |record|
           valid = record.valid?
           report.append(MasterDataTool::Report::VerifyReport.build_verify_record_report(self, record, valid))
+          next if valid
           next if ignore_fail
 
-          raise MasterDataTool::VerifyFailed.new("[#{table_name}] id = #{record.id} is invalid") unless valid
+          e = MasterDataTool::VerifyFailed.new("[#{table_name}] id = #{record.id} is invalid")
+          e.errors = record.errors
+
+          raise e
         end
       end
     end

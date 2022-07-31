@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'csv'
+require 'socket'
 require_relative "master_data_tool/version"
 require_relative "master_data_tool/config"
 require_relative "master_data_tool/master_data_status"
@@ -15,8 +16,12 @@ require_relative "master_data_tool/import"
 module MasterDataTool
   class Error < StandardError; end
   class DryRunError < StandardError; end
-  class VerifyFailed < StandardError; end
   class NotLoadedError < StandardError; end
+
+  class VerifyFailed < StandardError
+    attr_accessor :errors
+    delegate :full_messages, to: :errors
+  end
 
   class << self
     def config

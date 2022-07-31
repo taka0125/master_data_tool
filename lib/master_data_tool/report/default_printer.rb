@@ -7,6 +7,7 @@ module MasterDataTool
 
       def print(message)
         return if @silent
+        return if message.blank?
 
         MasterDataTool.config.logger.info message
         puts message
