@@ -14,6 +14,7 @@ env:
   DB_NAME: master_data_tool_test
   DB_USERNAME: root
   DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 jobs:
   test:
@@ -53,7 +54,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-
     env:
       BUNDLE_GEMFILE: /home/runner/work/master_data_tool/master_data_tool/gemfiles/${{ matrix.gemfile }}.gemfile
       DB_HOST: 127.0.0.1
@@ -66,6 +66,11 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+
+      - name: Setup Code Climate test-reporter
+        run: |
+          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          chmod +x ./cc-test-reporter
 
       - name: set MySQL sql_mode
         run: |
@@ -86,5 +91,8 @@ jobs:
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
       - name: Run tests
-        run: bundle exec rspec
+        run: |
+          ./cc-test-reporter before-build
+          bundle exec rspec
+          ./cc-test-reporter after-build --coverage-input-type simplecov --exit-code $?
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
