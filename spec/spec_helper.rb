@@ -57,3 +57,13 @@ instance = StandaloneActiverecordBootLoader::Instance.new(
   env: ENV['RAILS_ENV']
 )
 instance.execute
+
+if ENV['CI']
+  require 'simplecov'
+
+  SimpleCov.start do
+    %w[spec].each do |ignore_path|
+      add_filter(ignore_path)
+    end
+  end
+end
