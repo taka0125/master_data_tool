@@ -1,10 +1,20 @@
 # frozen_string_literal: true
 
+ENV['RAILS_ENV'] ||= 'test'
+
+if ENV['CI']
+  require 'simplecov'
+
+  SimpleCov.start do
+    %w[spec].each do |ignore_path|
+      add_filter(ignore_path)
+    end
+  end
+end
+
 require 'master_data_tool'
 require 'database_cleaner/active_record'
 require 'standalone_activerecord_boot_loader'
-
-ENV['RAILS_ENV'] ||= 'test'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
