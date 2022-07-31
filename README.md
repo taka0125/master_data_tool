@@ -35,18 +35,18 @@ Or install it yourself as:
 
 ### マスタデータの投入
 
-| option               | default | 内容                                                              |
-|----------------------| --- |-----------------------------------------------------------------|
-| --dry-run            | true | dry-runモードで実行する（データ変更は行わない）                                     |
-| --verify             | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
-| --only-import-tables | [] | 指定したテーブルのみデータ投入を行う                                              |
-| --except-import-tables | [] | 指定したテーブルのデータ投入を行わない                                             |
-| --only-verify-tables | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
-| --except-verify-tables | [] | 指定したテーブルのバリデーションチェックを行わない                                       |
-| --skip-no-change     | true | CSVファイルに更新がないテーブルをスキップする                                        |
-| --silent | false | 結果の出力をやめる                                                       |
+| option                          | default | 内容                                                              |
+|---------------------------------| --- |-----------------------------------------------------------------|
+| --dry-run                       | true | dry-runモードで実行する（データ変更は行わない）                                     |
+| --verify                        | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
+| --only-import-tables            | [] | 指定したテーブルのみデータ投入を行う                                              |
+| --except-import-tables          | [] | 指定したテーブルのデータ投入を行わない                                             |
+| --only-verify-tables            | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
+| --except-verify-tables          | [] | 指定したテーブルのバリデーションチェックを行わない                                       |
+| --skip-no-change                | true | CSVファイルに更新がないテーブルをスキップする                                        |
+| --silent                        | false | 結果の出力をやめる                                                       |
 | --delete-all-ignore-foreign-key | false | 外部キー制約を無視してレコードを消すかどうか                                          |
-| --override_identifier | nil | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
+| --override-identifier           | nil | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
 
 ```bash
 bundle exec master_data_tool import

@@ -43,7 +43,13 @@ RSpec.describe MasterDataTool::Import::Executor do
       context 'verify = true' do
         let(:verify) { true }
 
-        it { expect { subject }.to raise_error(MasterDataTool::VerifyFailed, '[items] id = 3 is invalid') }
+        it 'raise error' do
+          expect { subject }.to raise_error do |e|
+            expect(e).to be_a MasterDataTool::VerifyFailed
+            expect(e.message).to eq '[items] id = 3 is invalid'
+            expect(e.full_messages).to eq ['Field1 is too long (maximum is 10 characters)']
+          end
+        end
       end
 
       context 'verify = false' do
@@ -128,7 +134,11 @@ RSpec.describe MasterDataTool::Import::Executor do
         let(:only_verify_tables) { [] }
 
         it 'すべてのテーブルでバリデーションが走る' do
-          expect { subject }.to raise_error(MasterDataTool::VerifyFailed, '[items] id = 3 is invalid')
+          expect { subject }.to raise_error do |e|
+            expect(e).to be_a MasterDataTool::VerifyFailed
+            expect(e.message).to eq '[items] id = 3 is invalid'
+            expect(e.full_messages).to eq ['Field1 is too long (maximum is 10 characters)']
+          end
         end
       end
 
@@ -149,7 +159,11 @@ RSpec.describe MasterDataTool::Import::Executor do
         let(:except_verify_tables) { [] }
 
         it 'すべてのテーブルでバリデーションが走る' do
-          expect { subject }.to raise_error(MasterDataTool::VerifyFailed, '[items] id = 3 is invalid')
+          expect { subject }.to raise_error do |e|
+            expect(e).to be_a MasterDataTool::VerifyFailed
+            expect(e.message).to eq '[items] id = 3 is invalid'
+            expect(e.full_messages).to eq ['Field1 is too long (maximum is 10 characters)']
+          end
         end
       end
 

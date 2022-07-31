@@ -27,11 +27,13 @@ module MasterDataTool
         @override_identifier = override_identifier
         @report_printer = report_printer
         @report_printer.silent = silent
+        @master_data_statuses = []
       end
 
       def execute
         ApplicationRecord.transaction do
           print_execute_options
+          load_master_data_statuses
 
           master_data_collection = build_master_data_collection
 
@@ -50,6 +52,8 @@ module MasterDataTool
       end
 
       private
+
+      attr_reader :master_data_statuses
 
       def print_execute_options
         return if @silent
@@ -115,7 +119,10 @@ module MasterDataTool
         return true if import_skip_table?(master_data_file.table_name)
         return false unless @skip_no_change
 
-        !MasterDataTool::MasterDataStatus.master_data_will_change?(master_data_file)
+        master_data_status = master_data_statuses.dig(master_data_file.table_name)
+        return false unless master_data_status
+
+        !master_data_status.will_change?(master_data_file)
       end
 
       def import_skip_table?(table_name)
@@ -151,6 +158,10 @@ module MasterDataTool
 
         pattern = Pathname.new(MasterDataTool.config.master_data_dir).join(@override_identifier).join('*.csv').to_s
         Pathname.glob(pattern).select(&:file?)
+      end
+
+      def load_master_data_statuses
+        @master_data_statuses = MasterDataTool::MasterDataStatus.fetch_all
       end
     end
   end

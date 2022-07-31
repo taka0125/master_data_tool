@@ -1,4 +1,230 @@
+# TypeProf 0.21.3
+
+# Classes
 module MasterDataTool
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+  self.@config: Config
+
+  def self.config: -> Config
+  def self.configure: -> untyped
+  def self.resolve_table_name: (Pathname csv_path, String? override_identifier) -> String
+
+  class Config
+    def initialize: -> void
+  end
+
+  class MasterDataStatus
+    def will_change?: (MasterDataFile master_data_file) -> bool
+    def self.fetch_all: -> Hash[String,MasterDataStatus]
+    def self.build: (MasterDataFile master_data_file) -> MasterDataStatus
+    def self.import_records!: (Array[MasterDataStatus] records, dry_run: bool) -> Array[MasterDataStatus]
+    def self.master_data_will_change?: (MasterDataFile master_data_file) -> bool
+    def self.decide_version: (Pathname csv_path) -> String
+  end
+
+  class MasterDataFile
+    attr_reader table_name: String
+    attr_reader path: Pathname
+    attr_reader override_identifier: String?
+    def initialize: (String table_name, Pathname path, String? override_identifier) -> void
+    def self.build: (Pathname path, String? override_identifier) -> MasterDataFile
+    def basename: -> Pathname
+    def ==: (untyped other) -> bool
+    alias eql? ==
+    def hash: -> Integer
+  end
+
+  class MasterDataFileCollection
+    @override_identifier: String?
+    @collection: Array[MasterDataFile]
+
+    def initialize: (override_identifier: String?) -> void
+    def each: ?{ -> Array[MasterDataFile] } -> Enumerator[bot, untyped]
+    def to_a: -> Array[MasterDataFile]
+
+    private
+    def build: -> Array[MasterDataFile]
+    def extract_master_data_csv_paths: -> Array[MasterDataFile]
+    def overridden_master_data_csv_paths: -> Array[MasterDataFile]
+  end
+
+  class MasterData
+    @loaded: bool
+    @affected: bool
+    @preload_associations: Array[untyped]
+    @eager_load_associations: Array[untyped]
+
+    attr_reader master_data_file: MasterDataFile
+    attr_reader model_klass: untyped
+    attr_reader columns: Array[String]
+    attr_reader new_records: Array[untyped]
+    def new_records: -> Array[untyped]
+    attr_reader updated_records: Array[untyped]
+    def updated_records: -> Array[untyped]
+    attr_reader no_change_records: Array[untyped]
+    def no_change_records: -> Array[untyped]
+    attr_reader deleted_records: Array[untyped]
+    def deleted_records: -> Array[untyped]
+    attr_reader before_count: Integer
+    def before_count: -> Integer
+    attr_reader after_count: Integer
+    def after_count: -> Integer
+    def initialize: (MasterDataFile master_data_file, untyped model_klass) -> void
+    def self.build: (MasterDataFile master_data_file, ?load: bool) -> MasterData
+    def basename: -> Pathname
+    def load: -> true
+    def import_records: -> Array[untyped]
+    def affected_records: -> Array[untyped]
+    def loaded?: -> bool
+    def affected?: -> bool?
+    def table_name: -> String
+    def import!: (?dry_run: true, ?delete_all_ignore_foreign_key: false) -> Report::ImportReport
+    def verify!: (?ignore_fail: bool) -> Report::VerifyReport
+    def print_affected_table: -> Report::PrintAffectedTableReport?
+
+    private
+    def preload_associations: -> Array[untyped]
+    def eager_load_associations: -> Array[untyped]
+    def build_records_from_csv: (Array[Array[String?]] csv, Hash[Integer, untyped] old_records_by_id) -> Hash[Integer, untyped]
+    def enable_foreign_key_checks: -> untyped
+    def disable_foreign_key_checks: -> untyped
+  end
+
+  class MasterDataCollection
+    @collection: Array[MasterData]
+
+    def initialize: -> void
+    def append: (MasterData master_data) -> Array[MasterData]
+    def each: ?{ (MasterData) -> (Array[MasterDataStatus | {operation: :verify, table_name: untyped, valid: untyped, id: untyped}]?) } -> (Array[MasterData] | Enumerator[MasterData, untyped] | Enumerator[untyped, untyped])
+    def to_a: -> Array[MasterData]
+  end
+
+  module Report
+    module Printer
+      attr_accessor silent: false
+      def initialize: (?silent: false) -> void
+      def print: (String message) -> nil
+    end
+
+    class DefaultPrinter
+      include Printer
+
+      def print: (String message) -> nil
+    end
+
+    module Core
+      def initialize: (MasterData master_data) -> void
+      def print: (Printer printer) -> untyped
+
+      private
+      def convert_to_ltsv: ({operation: :affected_table | :verify, table_name: untyped, valid: untyped, id: untyped} items) -> String
+    end
+
+    class ImportReport
+      include Core
+      @master_data: MasterData
+
+      attr_reader reports: Array[untyped]
+      def reports: -> Array[untyped]
+      def print: (Printer printer) -> untyped
+
+      private
+      def count_report: -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+      def new_records_report: -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+      def updated_records_report: -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+      def no_change_records_report: -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+      def deleted_records_report: -> Hash[Symbol, Array[Hash[Symbol, untyped]]]
+    end
+
+    class VerifyReport
+      include Core
+      @master_data: MasterData
+
+      attr_reader reports: Array[{operation: :verify, table_name: untyped, valid: untyped, id: untyped}]
+      def initialize: (MasterData master_data) -> void
+      def append: ({operation: :verify, table_name: untyped, valid: untyped, id: untyped} verify_record_report) -> Array[{operation: :verify, table_name: untyped, valid: untyped, id: untyped}]
+      def print: (Printer printer) -> Array[{operation: :verify, table_name: untyped, valid: untyped, id: untyped}]
+      def self.build_verify_record_report: (MasterData master_data, untyped record, untyped valid) -> {operation: :verify, table_name: untyped, valid: untyped, id: untyped}
+    end
+
+    class PrintAffectedTableReport
+      include Core
+      @master_data: MasterData
+
+      def print: (Printer printer) -> nil
+    end
+  end
+
+  module Dump
+    class Executor
+      DEFAULT_IGNORE_TABLES: [String, String, String]
+      DEFAULT_IGNORE_COLUMNS: [String, String]
+      @ignore_empty_table: bool
+      @ignore_tables: Array[String]
+      @ignore_column_names: Array[String]
+      @only_tables: Array[String]
+      @verbose: bool
+
+      def initialize: (ignore_empty_table: bool, ignore_tables: Array[String], ignore_column_names: Array[String], only_tables: Array[String], verbose: bool) -> void
+      def execute: -> Array[untyped]
+
+      private
+      def print_message: (String message) -> nil
+      def dump_to_csv: (untyped table) -> nil
+      def ignore?: (untyped model_klass) -> false
+
+      class Error < Struct[untyped]
+        attr_accessor table(): untyped
+        attr_accessor exception(): nil
+      end
+    end
+  end
+
+  module Import
+    class Executor
+      @dry_run: bool
+      @verify: bool
+      @only_import_tables: Array[String]
+      @except_import_tables: Array[String]
+      @only_verify_tables: Array[String]
+      @except_verify_tables: Array[String]
+      @skip_no_change: bool
+      @silent: bool
+      @delete_all_ignore_foreign_key: bool
+      @override_identifier: String?
+      @report_printer: Report::DefaultPrinter
+      @master_data_statuses: [MasterDataStatus]
+
+      def initialize: (dry_run: bool, verify: bool, only_import_tables: Array[String], except_import_tables: Array[String], only_verify_tables: Array[String], except_verify_tables: Array[String], skip_no_change: bool, silent: bool, delete_all_ignore_foreign_key: bool, override_identifier: String?, report_printer: Report::Printer) -> void
+      def execute: -> nil
+
+      private
+      def print_execute_options: -> nil
+      def build_master_data_collection: -> MasterDataCollection
+      def import_all!: (MasterDataCollection master_data_collection) -> (Array[MasterData] | Enumerator[MasterData, untyped] | Enumerator[untyped, untyped])
+      def verify_all!: (MasterDataCollection master_data_collection) -> (Array[MasterData] | Enumerator[MasterData, untyped] | Enumerator[untyped, untyped])
+      def save_master_data_statuses!: (MasterDataCollection master_data_collection) -> Array[MasterDataStatus]
+      def print_affected_tables: (MasterDataCollection master_data_collection) -> (Array[MasterData] | Enumerator[MasterData, untyped] | Enumerator[untyped, untyped])
+      def load_skip_table?: (untyped master_data_file) -> bool
+      def import_skip_table?: (untyped table_name) -> bool
+      def verify_skip_table?: (untyped table_name) -> bool
+      def need_skip_table?: (untyped table_name, Array[untyped] only, Array[untyped] except) -> bool
+      def extract_master_data_csv_paths: -> Array[Pathname]
+      def overridden_master_data_csv_paths: -> Array[Pathname]
+      def master_data_statuses: -> untyped
+    end
+  end
+
+  class Error < StandardError
+  end
+
+  class DryRunError < StandardError
+  end
+
+  class NotLoadedError < StandardError
+  end
+
+  class VerifyFailed < StandardError
+    attr_accessor errors: untyped
+  end
 end
