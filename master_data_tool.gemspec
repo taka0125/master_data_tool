@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'appraisal'
   spec.add_development_dependency 'ridgepole'
   spec.add_development_dependency 'database_cleaner-active_record'
-  spec.add_development_dependency 'standalone_activerecord_boot_loader', '>= 0.2'
+  spec.add_development_dependency 'standalone_activerecord_boot_loader', '>= 0.3  '
   spec.add_development_dependency 'simplecov'
 
   spec.add_dependency 'activerecord', '>= 5.1.7'
