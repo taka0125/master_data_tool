@@ -4,6 +4,7 @@ RSpec.describe MasterDataTool::Import::Executor do
   describe '#execute' do
     let(:executor) do
       described_class.new(
+        spec_config: spec_config,
         dry_run: false,
         verify: verify,
         only_import_tables: only_import_tables,
@@ -20,6 +21,7 @@ RSpec.describe MasterDataTool::Import::Executor do
 
     subject { executor.execute }
 
+    let(:spec_config) { build_spec_config('') }
     let(:verify) { true }
     let(:only_import_tables) { [] }
     let(:except_import_tables) { [] }
@@ -227,7 +229,7 @@ RSpec.describe MasterDataTool::Import::Executor do
             config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
           end
 
-          MasterDataTool::Import::Executor.new(dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+          MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
 
           # 擬似的にマスタデータの変更を行う
           MasterDataTool.configure do |config|
@@ -259,15 +261,18 @@ RSpec.describe MasterDataTool::Import::Executor do
     # FIXME: 本当はpreloadされている事を確認したい
     context 'preloadオプション（configureでのみ設定可）' do
       let(:master_data_dir) { 'db/fixtures/preload_spec' }
+      let(:spec_config) { build_spec_config('', preload_associations: preload_associations) }
+      let(:preload_associations) do
+        {
+          ItemTagging: [:item, :tag],
+        }
+      end
 
       before do
         ActiveRecord::Base.logger = Logger.new(STDOUT)
 
         MasterDataTool.configure do |config|
           config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
-          config.preload_associations = {
-            ItemTagging: [:item, :tag],
-          }
         end
       end
 
@@ -283,15 +288,18 @@ RSpec.describe MasterDataTool::Import::Executor do
     # FIXME: 本当はpreloadされている事を確認したい
     context 'eager_loadオプション（configureでのみ設定可）' do
       let(:master_data_dir) { 'db/fixtures/eager_load_spec' }
+      let(:spec_config) { build_spec_config('', eager_load_associations: eager_load_associations) }
+      let(:eager_load_associations) do
+        {
+          ItemTagging: [:item, :tag],
+        }
+      end
 
       before do
         ActiveRecord::Base.logger = Logger.new(STDOUT)
 
         MasterDataTool.configure do |config|
           config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
-          config.eager_load_associations = {
-            ItemTagging: [:item, :tag],
-          }
         end
       end
 

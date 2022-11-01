@@ -4,6 +4,7 @@ require 'csv'
 require 'socket'
 require_relative "master_data_tool/version"
 require_relative "master_data_tool/config"
+require_relative "master_data_tool/spec_config"
 require_relative "master_data_tool/master_data_status"
 require_relative "master_data_tool/master_data_file"
 require_relative "master_data_tool/master_data_file_collection"
@@ -32,10 +33,9 @@ module MasterDataTool
       yield config
     end
 
-    def resolve_table_name(csv_path, override_identifier)
+    def resolve_table_name(spec_name, csv_path, override_identifier)
       # 0001_table_nameのように投入順序を制御可能にする
-      relative_path = config.master_data_dir
-      relative_path = "#{relative_path}/#{override_identifier}" if override_identifier.present?
+      relative_path = MasterDataTool.config.csv_dir_for(spec_name, override_identifier)
       csv_path.relative_path_from(relative_path).to_s.gsub(/^\d+_/, '').delete_suffix('.csv')
     end
   end

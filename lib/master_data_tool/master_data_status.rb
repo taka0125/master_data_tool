@@ -25,9 +25,9 @@ module MasterDataTool
         all.index_by(&:name)
       end
 
-      def build(master_data_file)
+      def build(spec_name, master_data_file)
         version = decide_version(master_data_file.path)
-        new(name: MasterDataTool.resolve_table_name(master_data_file.path, master_data_file.override_identifier), version: version)
+        new(spec_name: spec_name, name: MasterDataTool.resolve_table_name(spec_name, master_data_file.path, master_data_file.override_identifier), version: version)
       end
 
       def import_records!(records, dry_run: true)

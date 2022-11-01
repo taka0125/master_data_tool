@@ -11,7 +11,7 @@ RSpec.describe MasterDataTool::MasterDataCollection do
     subject { collection.append(master_data) }
 
     let(:collection) { described_class.new }
-    let(:master_data) { build_master_data(MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil) }
+    let(:master_data) { build_master_data('', MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil) }
 
     it '追加される' do
       subject
@@ -24,8 +24,8 @@ RSpec.describe MasterDataTool::MasterDataCollection do
     let(:collection) { described_class.new }
 
     it 'ソートされたMasterDataがとれる' do
-      items_master_data = build_master_data(MasterDataTool.config.master_data_dir.join('items.csv'), nil)
-      tags_master_data = build_master_data(MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil)
+      items_master_data = build_master_data('', MasterDataTool.config.master_data_dir.join('items.csv'), nil)
+      tags_master_data = build_master_data('', MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil)
 
       collection.append(items_master_data)
       collection.append(tags_master_data)

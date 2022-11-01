@@ -6,7 +6,7 @@ module MasterDataTool
       include Core
 
       def print(printer)
-        printer.print(convert_to_ltsv({operation: :affected_table, table_name: @master_data.table_name}))
+        printer.print(convert_to_ltsv({operation: :affected_table, table_name: master_data.table_name}))
       end
     end
   end

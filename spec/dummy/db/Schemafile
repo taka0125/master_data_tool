@@ -29,13 +29,14 @@ create_table 'item_taggings', id: :bigint, unsigned: true, force: :cascade do |t
 end
 
 create_table 'master_data_statuses', id: :bigint, unsigned: true, force: :cascade, comment: "マスタデータの状態管理用テーブル" do |t|
+  t.string   "spec_name", limit: 255, null: false, default: '', comment: 'テーブル名'
   t.string   "name", limit: 255, null: false, comment: 'テーブル名'
   t.string   "version", limit: 255, null: false, comment: 'ハッシュ値'
   t.datetime "created_at", null: false, comment: '作成日時'
   t.datetime "updated_at", null: false, comment: '更新日時'
 end
 
-add_index 'master_data_statuses', ["name"], name: "idx_master_data_statuses_1", unique: true, using: :btree
-add_index 'master_data_statuses', ["name", "version"], name: "idx_master_data_statuses_2", using: :btree
+add_index 'master_data_statuses', ["spec_name", "name"], name: "idx_master_data_statuses_1", unique: true, using: :btree
+add_index 'master_data_statuses', ["spec_name", "name", "version"], name: "idx_master_data_statuses_2", using: :btree
 
 add_foreign_key "taggings", "tags"

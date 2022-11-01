@@ -3,8 +3,9 @@
 RSpec.describe MasterDataTool::Report::ImportReport do
   describe '#print' do
     let(:report) { MasterDataTool::Report::ImportReport.new(master_data) }
-    let(:master_data) { build_master_data(MasterDataTool.config.master_data_dir.join('tags.csv'), nil) }
+    let(:master_data) { build_master_data('', MasterDataTool.config.master_data_dir.join('tags.csv'), nil) }
     let(:io) { StringIO.new }
+    let(:spec_config) { build_spec_config('') }
 
     subject { report.print(DebugPrinter.new(io)) }
 
@@ -39,7 +40,7 @@ operation:import	label:detail	table_name:tags	status:new	id:2
 
     context 'DBに入っているデータから追加があった' do
       before do
-        MasterDataTool::Import::Executor.new(dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do
@@ -68,7 +69,7 @@ operation:import	label:detail	table_name:tags	status:no_change	id:2
 
     context 'DBに入っているデータから削除があった' do
       before do
-        MasterDataTool::Import::Executor.new(dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do
@@ -96,7 +97,7 @@ operation:import	label:detail	table_name:tags	status:deleted	id:1
 
     context 'DBに入っているデータから更新があった' do
       before do
-        MasterDataTool::Import::Executor.new(dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do

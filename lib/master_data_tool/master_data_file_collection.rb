@@ -2,9 +2,11 @@
 
 module MasterDataTool
   class MasterDataFileCollection
-    def initialize(override_identifier: nil)
+    def initialize(spec_name, override_identifier: nil)
+      @spec_name = spec_name
       @override_identifier = override_identifier
       @collection = build
+
       freeze
     end
 
@@ -33,18 +35,18 @@ module MasterDataTool
     end
 
     def extract_master_data_csv_paths
-      pattern = Pathname.new(MasterDataTool.config.master_data_dir).join('*.csv').to_s
+      pattern = MasterDataTool.config.csv_dir_for(@spec_name).join('*.csv').to_s
       Pathname.glob(pattern).select(&:file?).map do |path|
-        MasterDataFile.build(path, nil)
+        MasterDataFile.build(@spec_name, path, nil)
       end
     end
 
     def overridden_master_data_csv_paths
       return [] if @override_identifier.blank?
 
-      pattern = Pathname.new(MasterDataTool.config.master_data_dir).join(@override_identifier).join('*.csv').to_s
+      pattern = MasterDataTool.config.csv_dir_for(@spec_name, @override_identifier).join('*.csv').to_s
       Pathname.glob(pattern).select(&:file?).map do |path|
-        MasterDataFile.build(path, @override_identifier)
+        MasterDataFile.build(@spec_name, path, @override_identifier)
       end
     end
   end
