@@ -51,19 +51,16 @@ class DebugPrinter
   end
 end
 
-def build_master_data(path, override_identifier)
-  f = MasterDataTool::MasterDataFile.build(path, override_identifier)
-  MasterDataTool::MasterData.build(f)
+def build_master_data(spec_name, path, override_identifier)
+  f = MasterDataTool::MasterDataFile.build(spec_name, path, override_identifier)
+  MasterDataTool::MasterData.build(build_spec_config(spec_name), f)
 end
 
-DUMMY_APP_ROOT = Pathname.new(__dir__).join('dummy')
-
-MasterDataTool.configure do |config|
-  config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')
+def build_spec_config(spec_name, preload_associations: {}, eager_load_associations: {})
+  MasterDataTool::SpecConfig.new(
+    spec_name: spec_name, application_record_class: ::ApplicationRecord,
+    preload_associations: preload_associations, eager_load_associations: eager_load_associations
+  )
 end
 
-instance = StandaloneActiverecordBootLoader::Instance.new(
-  DUMMY_APP_ROOT,
-  env: ENV['RAILS_ENV']
-)
-instance.execute
+require 'single_database_helper'

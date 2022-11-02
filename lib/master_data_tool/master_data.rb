@@ -2,11 +2,12 @@
 
 module MasterDataTool
   class MasterData
-    attr_reader :master_data_file, :model_klass, :columns, :new_records, :updated_records, :no_change_records, :deleted_records
-    attr_reader :before_count, :after_count
+    attr_reader :master_data_file, :model_klass, :columns, :new_records, :updated_records, :no_change_records, :deleted_records,
+                :before_count, :after_count, :spec_config
 
     # @param [MasterDataTool::MasterDataFile] master_data_file
-    def initialize(master_data_file, model_klass)
+    def initialize(spec_config, master_data_file, model_klass)
+      @spec_config = spec_config
       @master_data_file = master_data_file
       @model_klass = model_klass
 
@@ -20,9 +21,9 @@ module MasterDataTool
     end
 
     class << self
-      def build(master_data_file, load: false)
+      def build(spec_config, master_data_file, load: false)
         model_klass = Object.const_get(master_data_file.table_name.classify)
-        new(master_data_file, model_klass).tap do |record|
+        new(spec_config, master_data_file, model_klass).tap do |record|
           record.load if load
         end
       end
@@ -163,11 +164,11 @@ module MasterDataTool
     private
 
     def preload_associations
-      @preload_associations ||= MasterDataTool.config.preload_associations.dig(@model_klass.to_s.to_sym)
+      @preload_associations ||= spec_config.preload_associations.dig(@model_klass.to_s.to_sym)
     end
 
     def eager_load_associations
-      @eager_load_associations ||= MasterDataTool.config.eager_load_associations.dig(@model_klass.to_s.to_sym)
+      @eager_load_associations ||= spec_config.eager_load_associations.dig(@model_klass.to_s.to_sym)
     end
 
     def build_records_from_csv(csv, old_records_by_id)
@@ -186,11 +187,11 @@ module MasterDataTool
     end
 
     def enable_foreign_key_checks
-      ApplicationRecord.connection.execute('SET FOREIGN_KEY_CHECKS = 1')
+      spec_config.application_record_class.connection.execute('SET FOREIGN_KEY_CHECKS = 1')
     end
 
     def disable_foreign_key_checks
-      ApplicationRecord.connection.execute('SET FOREIGN_KEY_CHECKS = 0')
+      spec_config.application_record_class.connection.execute('SET FOREIGN_KEY_CHECKS = 0')
     end
   end
 end

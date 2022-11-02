@@ -8,4 +8,4 @@ mysql \
   -h ${DB_HOST} \
   -p${DB_PASSWORD} \
   --port ${DB_PORT} \
-  -e "DROP DATABASE ${DB_NAME}"
+  -e "DROP DATABASE IF EXISTS ${DB_NAME}"

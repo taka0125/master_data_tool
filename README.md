@@ -18,7 +18,8 @@
 ## 前提条件
 
 - マスタデータの更新は同時並行で実行されない
-- `db/fixtures/#{table_name}.csv` の命名規則
+- `db/fixtures/#{spec_name}/#{table_name}.csv` の命名規則
+    - 1DBの場合は `db/fixtures/#{table_name}.csv`
 
 ## インストール
 
@@ -34,22 +35,70 @@ Or install it yourself as:
 
     $ gem install master_data_tool
 
+## 初期設定
+
+`config/initializers/master_data_tool.rb`
+
+### 複数DB
+
+```ruby
+Rails.application.reloader.to_prepare do
+  MasterDataTool.configure do |config|
+    primary_config = MasterDataTool::SpecConfig.new(
+      spec_name: :primary,
+      master_data_dir: Rails.root.join('db/fixtures/primary'),
+      application_record_class: ::ApplicationRecord
+    )
+
+    animals_config = MasterDataTool::SpecConfig.new(
+      spec_name: :animals,
+      master_data_dir: Rails.root.join('db/fixtures/animals'),
+      application_record_class: ::AnimalsRecord
+    )
+
+    config.spec_configs = [
+      primary_config, animals_config
+    ]
+  end
+
+end
+```
+
+### 単一DB
+
+```ruby
+Rails.application.reloader.to_prepare do
+  MasterDataTool.configure do |config|
+    primary_config = MasterDataTool::SpecConfig.new(
+      spec_name: '',
+      master_data_dir: Rails.root.join('db/fixtures'),
+      application_record_class: ::ApplicationRecord
+    )
+
+    config.spec_configs = [
+      primary_config
+    ]
+  end
+end
+```
+
 ## Usage
 
 ### マスタデータの投入
 
 | option                          | default | 内容                                                              |
-|---------------------------------| --- |-----------------------------------------------------------------|
-| --dry-run                       | true | dry-runモードで実行する（データ変更は行わない）                                     |
-| --verify                        | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
-| --only-import-tables            | [] | 指定したテーブルのみデータ投入を行う                                              |
-| --except-import-tables          | [] | 指定したテーブルのデータ投入を行わない                                             |
-| --only-verify-tables            | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
-| --except-verify-tables          | [] | 指定したテーブルのバリデーションチェックを行わない                                       |
-| --skip-no-change                | true | CSVファイルに更新がないテーブルをスキップする                                        |
-| --silent                        | false | 結果の出力をやめる                                                       |
-| --delete-all-ignore-foreign-key | false | 外部キー制約を無視してレコードを消すかどうか                                          |
-| --override-identifier           | nil | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
+|---------------------------------|---------|-----------------------------------------------------------------|
+| --dry-run                       | true    | dry-runモードで実行する（データ変更は行わない）                                     |
+| --verify                        | true    | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
+| --spec-name                     | nil     | 対象となるDBのspec name                                               |
+| --only-import-tables            | []      | 指定したテーブルのみデータ投入を行う                                              |
+| --except-import-tables          | []      | 指定したテーブルのデータ投入を行わない                                             |
+| --only-verify-tables            | []      | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
+| --except-verify-tables          | []      | 指定したテーブルのバリデーションチェックを行わない                                       |
+| --skip-no-change                | true    | CSVファイルに更新がないテーブルをスキップする                                        |
+| --silent                        | false   | 結果の出力をやめる                                                       |
+| --delete-all-ignore-foreign-key | false   | 外部キー制約を無視してレコードを消すかどうか                                          |
+| --override-identifier           | nil     | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
 
 ```bash
 bundle exec master_data_tool import
@@ -119,8 +168,8 @@ add_index 'master_data_statuses', ["name"], name: "idx_master_data_statuses_1", 
 add_index 'master_data_statuses', ["name", "version"], name: "idx_master_data_statuses_2", using: :btree
 ```
 
-
 ## Tips
+
 ### マスタデータ投入でどうなるか？を調べる
 
 ```
@@ -174,7 +223,7 @@ export DB_NAME=master_data_tool_test
 ```
 
 - dockerでMySQLを立ち上げるたびにポートは変わるのでDB_PORTは都度設定する
-  - direnvを使っているならば `direnv reload` すればいい
+    - direnvを使っているならば `direnv reload` すればいい
 
 ```
 ./scripts/setup.sh
@@ -187,7 +236,6 @@ bundle exec appraisal activerecord52 rspec
 bundle exec appraisal activerecord61 rspec
 bundle exec appraisal activerecord70 rspec
 ```
-
 
 ## Contributing
 

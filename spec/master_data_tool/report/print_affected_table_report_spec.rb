@@ -2,8 +2,9 @@
 
 RSpec.describe MasterDataTool::Report::PrintAffectedTableReport do
   describe '#print' do
-    let(:master_data) { build_master_data(MasterDataTool.config.master_data_dir.join('items.csv'), nil) }
+    let(:master_data) { build_master_data('', MasterDataTool.config.master_data_dir.join('items.csv'), nil) }
     let(:io) { StringIO.new }
+    let(:spec_config) { build_spec_config('') }
 
     subject { master_data.print_affected_table&.print(DebugPrinter.new(io)) }
 
@@ -29,7 +30,7 @@ operation:affected_table	table_name:items
 
     context 'データ投入は行われない' do
       it 'レポートは表示されない' do
-        MasterDataTool::Import::Executor.new(dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
         master_data.load
 
         expect(subject).to be_nil

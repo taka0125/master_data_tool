@@ -7,7 +7,7 @@ module MasterDataTool
 
   def self.config: -> Config
   def self.configure: -> untyped
-  def self.resolve_table_name: (Pathname csv_path, String? override_identifier) -> String
+  def self.resolve_table_name: (String spec_name, Pathname csv_path, String? override_identifier) -> String
 
   class Config
     def initialize: -> void
@@ -16,18 +16,19 @@ module MasterDataTool
   class MasterDataStatus
     def will_change?: (MasterDataFile master_data_file) -> bool
     def self.fetch_all: -> Hash[String,MasterDataStatus]
-    def self.build: (MasterDataFile master_data_file) -> MasterDataStatus
+    def self.build: (String spec_name, MasterDataFile master_data_file) -> MasterDataStatus
     def self.import_records!: (Array[MasterDataStatus] records, dry_run: bool) -> Array[MasterDataStatus]
     def self.master_data_will_change?: (MasterDataFile master_data_file) -> bool
     def self.decide_version: (Pathname csv_path) -> String
   end
 
   class MasterDataFile
+    attr_reader spec_name: String
     attr_reader table_name: String
     attr_reader path: Pathname
     attr_reader override_identifier: String?
-    def initialize: (String table_name, Pathname path, String? override_identifier) -> void
-    def self.build: (Pathname path, String? override_identifier) -> MasterDataFile
+    def initialize: (String spec_name, String table_name, Pathname path, String? override_identifier) -> void
+    def self.build: (String spec_name, Pathname path, String? override_identifier) -> MasterDataFile
     def basename: -> Pathname
     def ==: (untyped other) -> bool
     alias eql? ==
@@ -35,10 +36,11 @@ module MasterDataTool
   end
 
   class MasterDataFileCollection
+    @spec_name: String
     @override_identifier: String?
     @collection: Array[MasterDataFile]
 
-    def initialize: (override_identifier: String?) -> void
+    def initialize: (String spec_name, override_identifier: String?) -> void
     def each: ?{ -> Array[MasterDataFile] } -> Enumerator[bot, untyped]
     def to_a: -> Array[MasterDataFile]
 
@@ -48,12 +50,27 @@ module MasterDataTool
     def overridden_master_data_csv_paths: -> Array[MasterDataFile]
   end
 
+  class SpecConfig
+    attr_reader spec_name: String
+    attr_reader application_record_class: Class
+    attr_reader dump_ignore_tables: Array[String]
+    attr_reader dump_ignore_columns: Array[String]
+    attr_reader default_import_options: Hash[String,Class]
+    attr_reader logger: Logger
+    attr_reader preload_associations: Hash[Class, Array[Symbol]]
+    attr_reader eager_load_associations: Hash[Class, Array[Symbol]]
+
+    def initialize: (spec_name: String, application_record_class: Class, dump_ignore_tables: Array[String], dump_ignore_columns: Array[String],
+        default_import_options: Hash[String,Class], logger: Logger, preload_associations: Hash[Class, Array[Symbol]], eager_load_associations: Hash[Class, Array[Symbol]]) -> void
+  end
+
   class MasterData
     @loaded: bool
     @affected: bool
     @preload_associations: Array[untyped]
     @eager_load_associations: Array[untyped]
 
+    attr_reader spec_config: SpecConfig
     attr_reader master_data_file: MasterDataFile
     attr_reader model_klass: untyped
     attr_reader columns: Array[String]
@@ -69,8 +86,8 @@ module MasterDataTool
     def before_count: -> Integer
     attr_reader after_count: Integer
     def after_count: -> Integer
-    def initialize: (MasterDataFile master_data_file, untyped model_klass) -> void
-    def self.build: (MasterDataFile master_data_file, ?load: bool) -> MasterData
+    def initialize: (SpecConfig spec_config, MasterDataFile master_data_file, untyped model_klass) -> void
+    def self.build: (SpecConfig spec_config, MasterDataFile master_data_file, ?load: bool) -> MasterData
     def basename: -> Pathname
     def load: -> true
     def import_records: -> Array[untyped]
@@ -101,8 +118,9 @@ module MasterDataTool
 
   module Report
     module Printer
+      attr_reader spec_config: SpecConfig
       attr_accessor silent: false
-      def initialize: (?silent: false) -> void
+      def initialize: (SpecConfig spec_config, ?silent: false) -> void
       def print: (String message) -> nil
     end
 
@@ -157,15 +175,16 @@ module MasterDataTool
 
   module Dump
     class Executor
-      DEFAULT_IGNORE_TABLES: [String, String, String]
-      DEFAULT_IGNORE_COLUMNS: [String, String]
+      DEFAULT_IGNORE_TABLES: Array[String]
+      DEFAULT_IGNORE_COLUMNS: Array[String]
+      @spec_config: SpecConfig
       @ignore_empty_table: bool
       @ignore_tables: Array[String]
       @ignore_column_names: Array[String]
       @only_tables: Array[String]
       @verbose: bool
 
-      def initialize: (ignore_empty_table: bool, ignore_tables: Array[String], ignore_column_names: Array[String], only_tables: Array[String], verbose: bool) -> void
+      def initialize: (spec_config: SpecConfig, ignore_empty_table: bool, ignore_tables: Array[String], ignore_column_names: Array[String], only_tables: Array[String], verbose: bool) -> void
       def execute: -> Array[untyped]
 
       private
@@ -182,6 +201,7 @@ module MasterDataTool
 
   module Import
     class Executor
+      @spec_config: SpecConfig
       @dry_run: bool
       @verify: bool
       @only_import_tables: Array[String]
@@ -195,7 +215,7 @@ module MasterDataTool
       @report_printer: Report::DefaultPrinter
       @master_data_statuses: [MasterDataStatus]
 
-      def initialize: (dry_run: bool, verify: bool, only_import_tables: Array[String], except_import_tables: Array[String], only_verify_tables: Array[String], except_verify_tables: Array[String], skip_no_change: bool, silent: bool, delete_all_ignore_foreign_key: bool, override_identifier: String?, report_printer: Report::Printer) -> void
+      def initialize: (spec_config: SpecConfig, dry_run: bool, verify: bool, only_import_tables: Array[String], except_import_tables: Array[String], only_verify_tables: Array[String], except_verify_tables: Array[String], skip_no_change: bool, silent: bool, delete_all_ignore_foreign_key: bool, override_identifier: String?, report_printer: Report::Printer) -> void
       def execute: -> nil
 
       private
