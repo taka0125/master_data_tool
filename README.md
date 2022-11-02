@@ -40,7 +40,9 @@ Or install it yourself as:
 | --dry-run            | true | dry-runモードで実行する（データ変更は行わない）       |
 | --verify             | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う |
 | --only-import-tables | [] | 指定したテーブルのみデータ投入を行う                |
+| --except-import-tables | [] | 指定したテーブルのデータ投入を行わない               |
 | --only-verify-tables | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う      |
+| --except-verify-tables | [] | 指定したテーブルのバリデーションチェックを行わない         |
 | --skip-no-change     | true | CSVファイルに更新がないテーブルをスキップする          |
 | --silent | false | 結果の出力をやめる                         |
 
@@ -55,7 +57,9 @@ bundle exec thor master_data_tool import \
   --dry-run=true \
   --verify=true \
   --only-import-tables="" \
+  --except-import-tables="" \
   --only-verify-tables="" \
+  --except-verify-tables="" \
   --skip-no-change=true \
   --silent=false
 ```
