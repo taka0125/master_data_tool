@@ -18,8 +18,8 @@ module MasterDataTool
 
     def csv_dir_for(spec_name, override_identifier = nil)
       path = MasterDataTool.config.master_data_dir
-      path = path.join(spec_name) if spec_name.present?
-      path = path.join(override_identifier) if override_identifier.present?
+      path = path.join(spec_name.to_s) if spec_name.present?
+      path = path.join(override_identifier.to_s) if override_identifier.present?
       path
     end
   end
