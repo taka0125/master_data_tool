@@ -3,13 +3,15 @@
 module MasterDataTool
   module Import
     class Executor
-      def initialize(dry_run: true, verify: true, only_import_tables: [], only_verify_tables: [], skip_no_change: true, report_printer: MasterDataTool::Report::DefaultPrinter.new)
+      def initialize(dry_run: true, verify: true, only_import_tables: [], only_verify_tables: [], skip_no_change: true, silent: false, report_printer: MasterDataTool::Report::DefaultPrinter.new)
         @dry_run = dry_run
         @verify = verify
         @only_import_tables = Array(only_import_tables)
         @only_verify_tables = Array(only_verify_tables)
         @skip_no_change = skip_no_change
+        @silent = silent
         @report_printer = report_printer
+        @report_printer.silent = silent
       end
 
       def execute

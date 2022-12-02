@@ -35,13 +35,14 @@ Or install it yourself as:
 
 ### マスタデータの投入
 
-| option               | default | 内容                                   |
-|----------------------| --- |--------------------------------------|
-| --dry-run            | true | dry-runモードで実行する（データ変更は行わない）          |
-| --verify             | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う    |
-| --only-import-tables | [] | 指定したテーブルのみデータ投入を行う                   |
-| --only-verify-tables | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う |
-| --skip-no-change     | true | CSVファイルに更新がないテーブルをスキップする             |
+| option               | default | 内容                                |
+|----------------------| --- |-----------------------------------|
+| --dry-run            | true | dry-runモードで実行する（データ変更は行わない）       |
+| --verify             | true | データ投入後に全テーブル・全レコードのバリデーションチェックを行う |
+| --only-import-tables | [] | 指定したテーブルのみデータ投入を行う                |
+| --only-verify-tables | [] | 指定したテーブルのみ投入後のバリデーションチェックを行う      |
+| --skip-no-change     | true | CSVファイルに更新がないテーブルをスキップする          |
+| --silent | false | 結果の出力をやめる                         |
 
 ```bash
 bundle exec master_data_tool import
@@ -55,7 +56,8 @@ bundle exec thor master_data_tool import \
   --verify=true \
   --only-import-tables="" \
   --only-verify-tables="" \
-  --skip-no-change=true
+  --skip-no-change=true \
+  --silent=false
 ```
 
 ### ダンプ
