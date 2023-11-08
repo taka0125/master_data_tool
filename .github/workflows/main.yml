@@ -37,6 +37,8 @@ jobs:
         exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
           - ruby: '2.6'
             activerecord: '7.0'
+          - ruby: '2.6'
+            activerecord: '7.1'
           - ruby: '3.0'
             activerecord: '5.2'
           - ruby: '3.1'
