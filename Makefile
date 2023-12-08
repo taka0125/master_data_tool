@@ -19,6 +19,9 @@ setup: up
 	$(MAKE) drop_db
 	$(MAKE) create_db
 	$(DOCKER_COMPOSE) exec ruby bash -c './scripts/migrate.sh'
+setup_for_ci:
+	mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+	./scripts/migrate.sh
 create_db:
 	@$(DOCKER_COMPOSE) exec mysql mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 drop_db:

@@ -24,25 +24,13 @@ jobs:
 
       matrix:
         ruby:
-          - '2.6'
-          - '2.7'
           - '3.0'
           - '3.1'
         activerecord:
-          - '5.2'
           - '6.0'
           - '6.1'
           - '7.0'
           - '7.1'
-        exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
-          - ruby: '2.6'
-            activerecord: '7.0'
-          - ruby: '2.6'
-            activerecord: '7.1'
-          - ruby: '3.0'
-            activerecord: '5.2'
-          - ruby: '3.1'
-            activerecord: '5.2'
 
     services:
       mysql:
@@ -85,7 +73,7 @@ jobs:
 
       - name: Setup DB
         run: |
-          make setup
+          make setup_for_ci
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
       - name: Run tests
