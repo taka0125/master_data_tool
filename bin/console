@@ -3,6 +3,19 @@
 
 require "bundler/setup"
 require "master_data_tool"
+require "standalone_activerecord_boot_loader"
+
+DUMMY_APP_ROOT = Pathname.new(__dir__).join('../spec/dummy')
+
+MasterDataTool.configure do |config|
+  config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures')
+end
+
+instance = StandaloneActiverecordBootLoader::Instance.new(
+  DUMMY_APP_ROOT,
+  env: ENV.fetch('RAILS_ENV', 'test')
+)
+instance.execute
 
 # You can add fixtures and/or initialization code here to make experimenting
 # with your gem easier. You can also use a different console, if you like.
@@ -12,4 +25,4 @@ require "master_data_tool"
 # Pry.start
 
 require "irb"
-IRB.start(__FILE__)
+::IRB.start(__FILE__)

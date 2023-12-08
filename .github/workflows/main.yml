@@ -14,6 +14,7 @@ env:
   DB_NAME: master_data_tool_test
   DB_USERNAME: root
   DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  DB_HOST: 127.0.0.1
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 jobs:
@@ -24,29 +25,17 @@ jobs:
 
       matrix:
         ruby:
-          - '2.6'
-          - '2.7'
           - '3.0'
           - '3.1'
         activerecord:
-          - '5.2'
           - '6.0'
           - '6.1'
           - '7.0'
           - '7.1'
-        exclude: # https://github.com/sue445/activerecord-compatible_legacy_migration/blob/master/.github/workflows/test.yml
-          - ruby: '2.6'
-            activerecord: '7.0'
-          - ruby: '2.6'
-            activerecord: '7.1'
-          - ruby: '3.0'
-            activerecord: '5.2'
-          - ruby: '3.1'
-            activerecord: '5.2'
 
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:8
         ports:
           - 3306:3306
         env:
@@ -60,7 +49,6 @@ jobs:
 
     env:
       BUNDLE_GEMFILE: gemfiles/activerecord${{ matrix.activerecord }}.gemfile
-      DB_HOST: 127.0.0.1
 
     steps:
       - uses: actions/checkout@v4
@@ -73,11 +61,10 @@ jobs:
 
       - name: set MySQL sql_mode
         run: |
-          mysql --ssl-mode=DISABLE --protocol=tcp --host 127.0.0.1 --user=root --password=${{ env.DB_PASSWORD }} mysql <<SQL
+          mysql --ssl-mode=DISABLE --get-server-public-key --protocol=tcp --host 127.0.0.1 --user=${{ env.DB_USERNAME }} --password=${{ env.DB_PASSWORD }} mysql <<SQL
           SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';
           SET GLOBAL character_set_server = 'utf8mb4';
           SET GLOBAL innodb_file_per_table = 1;
-          SET GLOBAL innodb_large_prefix = ON;
           SQL
 
       - name: set ENV
@@ -86,7 +73,8 @@ jobs:
 
       - name: Setup DB
         run: |
-          ./scripts/setup.sh
+          mysql -h ${DB_HOST} -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+          ./scripts/migrate.sh
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
       - name: Run tests
