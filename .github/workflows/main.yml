@@ -14,6 +14,7 @@ env:
   DB_NAME: master_data_tool_test
   DB_USERNAME: root
   DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  DB_HOST: 127.0.0.1
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 jobs:
@@ -73,7 +74,7 @@ jobs:
 
       - name: Setup DB
         run: |
-          mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+          mysql -h ${DB_HOST} -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
           ./scripts/migrate.sh
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
