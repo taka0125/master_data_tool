@@ -15,5 +15,7 @@ jobs:
     uses: taka0125/rubygems_release_workflow/.github/workflows/release.yml@v1
     with:
       rubygems-otp-code: ${{ github.event.inputs.rubygems-otp-code }}
+      user-email: taka0125@gmail.com
+      user-name: Takahiro Ooishi
     secrets:
       RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
