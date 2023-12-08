@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-f3WpxNreVT2NgQry}
+    ports:
+      - 127.0.0.1:${DB_PORT:-33306}:3306
+    volumes:
+      - mysql:/var/lib/mysql
+    command: >
+      mysqld 
+        --sql-mode=NO_ENGINE_SUBSTITUTION
+        --character-set-server=utf8mb4
+        --innodb-file-per-table=1
+
+  ruby:
+    image: ruby:3.2
+    command: sleep infinity
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - bundle:/bundle
+    environment:
+      - HISTFILE=/app/.bash_history
+      - BUNDLE_PATH=/bundle
+      - BUNDLE_JOBS=4
+      - DB_HOST=mysql
+      - DB_NAME=master_data_tool
+      - DB_USERNAME=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD:-f3WpxNreVT2NgQry}
+    depends_on:
+      - mysql
+
+volumes:
+  mysql:
+  bundle:

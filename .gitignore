@@ -15,7 +15,9 @@ Gemfile.lock
 vendor
 
 .envrc
+.bash_history
 spec/dummy-*/log/*.log
 gemfiles/*.gemfile.lock
 
 docker-compose.override.yml
+compose.override.yaml
