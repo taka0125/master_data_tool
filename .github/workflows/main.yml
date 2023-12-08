@@ -49,7 +49,6 @@ jobs:
 
     env:
       BUNDLE_GEMFILE: gemfiles/activerecord${{ matrix.activerecord }}.gemfile
-      DB_HOST: 127.0.0.1
 
     steps:
       - uses: actions/checkout@v4
