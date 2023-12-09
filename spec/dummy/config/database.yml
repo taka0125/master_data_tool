@@ -1,12 +1,11 @@
 default: &default
   adapter: mysql2
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: <%= ENV["DB_HOST"] %>
-  port: <%= ENV["DB_PORT"] %>
-  database: <%= ENV["DB_NAME"] %>
-  username: <%= ENV["DB_USERNAME"] %>
-  password: <%= ENV["DB_PASSWORD"] %>
+  host: <%= ENV.fetch('DB_HOST') %>
+  port: <%= ENV.fetch('DB_PORT') %>
+  database: <%= ENV.fetch('DB_NAME') %>
+  username: <%= ENV.fetch('DB_USER') %>
+  password: <%= ENV.fetch('DB_PASSWORD') %>
 
 test:
   <<: *default
-  database: master_data_tool_test

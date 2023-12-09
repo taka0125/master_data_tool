@@ -12,19 +12,20 @@ restart:
 	$(MAKE) up
 ps:
 	$(DOCKER_COMPOSE) ps
+convert:
+	$(DOCKER_COMPOSE) convert
 setup: up
 	$(DOCKER_COMPOSE) exec ruby bash -c 'bin/setup'
 	$(MAKE) mysql/drop_db
 	$(MAKE) mysql/create_db
 	$(DOCKER_COMPOSE) exec ruby bash -c './scripts/migrate.sh'
-setup_for_ci:
-	mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
-	./scripts/migrate.sh
 mysql/create_db:
-	@$(DOCKER_COMPOSE) exec mysql mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+	@$(DOCKER_COMPOSE) exec -e MYSQL_PWD=${DB_PASSWORD} mysql mysql -u ${DB_USER} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 mysql/drop_db:
-	@$(DOCKER_COMPOSE) exec mysql mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}"
+	@$(DOCKER_COMPOSE) exec -e MYSQL_PWD=${DB_PASSWORD} mysql mysql -u ${DB_USER} -e "DROP DATABASE IF EXISTS ${DB_NAME}"
 ruby/bash:
 	$(DOCKER_COMPOSE) exec ruby bash
 ruby/rspec: up
 	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec rspec'
+ruby/appraisal/generate:
+	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec appraisal generate'

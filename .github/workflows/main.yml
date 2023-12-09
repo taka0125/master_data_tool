@@ -11,10 +11,12 @@ on:
 
 env:
   RAILS_ENV: test
-  DB_NAME: master_data_tool_test
-  DB_USERNAME: root
-  DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
   DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_USER: root
+  DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+  DB_NAME: master_data_tool_test
+  MYSQL_PWD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
   CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 jobs:
@@ -61,19 +63,15 @@ jobs:
 
       - name: set MySQL sql_mode
         run: |
-          mysql --ssl-mode=DISABLE --get-server-public-key --protocol=tcp --host 127.0.0.1 --user=${{ env.DB_USERNAME }} --password=${{ env.DB_PASSWORD }} mysql <<SQL
+          mysql --ssl-mode=DISABLE --get-server-public-key --protocol=tcp --host=${{ env.DB_HOST }} --user=${{ env.DB_USER }} mysql <<SQL
           SET GLOBAL sql_mode = 'NO_ENGINE_SUBSTITUTION';
           SET GLOBAL character_set_server = 'utf8mb4';
-          SET GLOBAL innodb_file_per_table = 1;
+          SET GLOBAL innodb_file_per_table = ON;
           SQL
-
-      - name: set ENV
-        run: |
-          echo "DB_PORT=${{ job.services.mysql.ports[3306] }}" >> $GITHUB_ENV
 
       - name: Setup DB
         run: |
-          mysql -h ${DB_HOST} -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
+          mysql -u ${DB_USER} -h ${DB_HOST} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
           ./scripts/migrate.sh
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
