@@ -12,17 +12,19 @@ restart:
 	$(MAKE) up
 ps:
 	$(DOCKER_COMPOSE) ps
-bash:
-	$(DOCKER_COMPOSE) exec ruby bash
 setup: up
 	$(DOCKER_COMPOSE) exec ruby bash -c 'bin/setup'
-	$(MAKE) drop_db
-	$(MAKE) create_db
+	$(MAKE) mysql/drop_db
+	$(MAKE) mysql/create_db
 	$(DOCKER_COMPOSE) exec ruby bash -c './scripts/migrate.sh'
 setup_for_ci:
 	mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 	./scripts/migrate.sh
-create_db:
+mysql/create_db:
 	@$(DOCKER_COMPOSE) exec mysql mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
-drop_db:
+mysql/drop_db:
 	@$(DOCKER_COMPOSE) exec mysql mysql -u ${DB_USERNAME} -p${DB_PASSWORD} -e "DROP DATABASE IF EXISTS ${DB_NAME}"
+ruby/bash:
+	$(DOCKER_COMPOSE) exec ruby bash
+ruby/rspec: up
+	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec rspec'
