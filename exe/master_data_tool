@@ -22,7 +22,7 @@ module MasterDataTool
     option :delete_all_ignore_foreign_key, default: nil, type: :boolean
     desc 'import', 'import'
     def import
-      spec_config = MasterDataTool.config.spec_config(options['spec_name'])
+      spec_config = MasterDataTool.config.spec_config(options[:spec_name])
       new_options = config.default_import_options.with_indifferent_access.merge(options)
       new_options[:spec_config] = spec_config
 
@@ -57,7 +57,7 @@ module MasterDataTool
       ignore_column_names = options[:ignore_column_names]
       only_tables = options[:only_tables]
       verbose = options[:verbose]
-      spec_config = MasterDataTool.config.spec_config(options['spec_name'])
+      spec_config = MasterDataTool.config.spec_config(options[:spec_name])
 
       executor = MasterDataTool::Dump::Executor.new(
         spec_config: spec_config,

@@ -13,7 +13,7 @@ module MasterDataTool
     end
 
     def spec_config(spec_name)
-      spec_configs.detect { |c| c.spec_name == spec_name }
+      spec_configs.detect { |c| c.spec_name.to_s == spec_name.to_s }
     end
 
     def csv_dir_for(spec_name, override_identifier = nil)
