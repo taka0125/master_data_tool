@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'active_record'
-require 'activerecord-import'
 require 'openssl'
 
 module MasterDataTool
@@ -36,11 +35,18 @@ module MasterDataTool
           return
         end
 
-        import!(records, validate: true, on_duplicate_key_update: %w[name version], timestamps: true)
+        import_records = records.map { |obj| obj.attributes.slice(*import_columns) }
+        upsert_all(import_records, update_only: %w[version])
       end
 
       def decide_version(csv_path)
         OpenSSL::Digest::SHA256.hexdigest(File.open(csv_path).read)
+      end
+
+      private
+
+      def import_columns
+        %w[spec_name name version]
       end
     end
   end

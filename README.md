@@ -84,6 +84,16 @@ end
 
 ## Usage
 
+### はじめに
+
+マスタデータとして扱うモデルには `include MasterDataTool::ActAsMasterData` を入れる
+
+```ruby
+class Prefecture < ApplicationRecord
+  include MasterDataTool::ActAsMasterData
+end
+```
+
 ### マスタデータの投入
 
 | option                          | default | 内容                                                              |

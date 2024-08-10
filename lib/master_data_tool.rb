@@ -3,6 +3,7 @@
 require 'csv'
 require 'socket'
 require_relative "master_data_tool/version"
+require_relative "master_data_tool/act_as_master_data"
 require_relative "master_data_tool/config"
 require_relative "master_data_tool/spec_config"
 require_relative "master_data_tool/master_data_status"

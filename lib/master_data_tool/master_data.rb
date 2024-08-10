@@ -2,8 +2,7 @@
 
 module MasterDataTool
   class MasterData
-    attr_reader :master_data_file, :model_klass, :columns, :new_records, :updated_records, :no_change_records, :deleted_records,
-                :before_count, :after_count, :spec_config
+    attr_reader :master_data_file, :model_klass, :columns, :spec_config
 
     # @param [MasterDataTool::MasterDataFile] master_data_file
     def initialize(spec_config, master_data_file, model_klass)
@@ -12,7 +11,6 @@ module MasterDataTool
       @model_klass = model_klass
 
       @loaded = false
-
       @columns = []
       @new_records = []
       @updated_records = []
@@ -30,17 +28,17 @@ module MasterDataTool
     end
 
     def basename
-      @master_data_file.basename
+      master_data_file.basename
     end
 
     def load
-      csv = CSV.read(@master_data_file.path, headers: true, skip_blanks: true)
-      old_records_by_id = @model_klass.all.index_by(&:id)
+      csv = CSV.read(master_data_file.path, headers: true, skip_blanks: true)
+      old_records_by_id = model_klass.all.index_by(&:id)
 
       csv_records_by_id = build_records_from_csv(csv, old_records_by_id)
       deleted_ids = old_records_by_id.keys - csv_records_by_id.keys
 
-      @columns = csv.headers
+      self.columns = csv.headers
 
       csv_records_by_id.each do |_, record|
         if record.new_record?
@@ -74,25 +72,25 @@ module MasterDataTool
     end
 
     def new_records
-      raise MasterDataTool::NotLoadedError unless @loaded
+      raise MasterDataTool::NotLoadedError unless loaded?
 
       @new_records
     end
 
     def updated_records
-      raise MasterDataTool::NotLoadedError unless @loaded
+      raise MasterDataTool::NotLoadedError unless loaded?
 
       @updated_records
     end
 
     def no_change_records
-      raise MasterDataTool::NotLoadedError unless @loaded
+      raise MasterDataTool::NotLoadedError unless loaded?
 
       @no_change_records
     end
 
     def deleted_records
-      raise MasterDataTool::NotLoadedError unless @loaded
+      raise MasterDataTool::NotLoadedError unless loaded?
 
       @deleted_records
     end
@@ -115,28 +113,31 @@ module MasterDataTool
     end
 
     def table_name
-      @model_klass.table_name
+      model_klass.table_name
     end
 
     def import!(dry_run: true, delete_all_ignore_foreign_key: false)
-      raise MasterDataTool::NotLoadedError unless @loaded
+      raise MasterDataTool::NotLoadedError unless loaded?
 
       MasterDataTool::Report::ImportReport.new(self).tap do |report|
         return report if dry_run
         return report unless affected?
 
         disable_foreign_key_checks if delete_all_ignore_foreign_key
-        @model_klass.delete_all
+        model_klass.delete_all
         enable_foreign_key_checks if delete_all_ignore_foreign_key
 
-        # マスターデータ間の依存がある場合に投入順制御するのは大変なのでこのタイミングでのバリデーションはしない
-        @model_klass.import(import_records, validate: false, on_duplicate_key_update: @columns, timestamps: true)
+        records = import_records.map { |obj| obj.attributes.slice(*columns) }
+        model_klass.insert_all(records)
       end
     end
 
     def verify!(ignore_fail: false)
       MasterDataTool::Report::VerifyReport.new(self).tap do |report|
-        scoped = @model_klass.all
+        belongs_to_associations = model_klass.reflections.values.select(&:belongs_to?).map(&:name)
+
+        scoped = model_klass.all
+        scoped = scoped.preload(*belongs_to_associations) unless belongs_to_associations.empty?
         scoped = scoped.preload(preload_associations) if preload_associations
         scoped = scoped.eager_load(eager_load_associations) if eager_load_associations
 
@@ -163,19 +164,22 @@ module MasterDataTool
 
     private
 
+    attr_writer :loaded, :columns, :new_records, :updated_records,
+                  :no_change_records, :deleted_records
+
     def preload_associations
-      @preload_associations ||= spec_config.preload_associations.dig(@model_klass.to_s.to_sym)
+      @preload_associations ||= spec_config.preload_associations.dig(model_klass.to_s.to_sym)
     end
 
     def eager_load_associations
-      @eager_load_associations ||= spec_config.eager_load_associations.dig(@model_klass.to_s.to_sym)
+      @eager_load_associations ||= spec_config.eager_load_associations.dig(model_klass.to_s.to_sym)
     end
 
     def build_records_from_csv(csv, old_records_by_id)
       {}.tap do |records|
         csv.each do |row|
           id = row['id'].to_i
-          record = old_records_by_id[id] || @model_klass.new(id: id)
+          record = old_records_by_id[id] || model_klass.new(id: id)
 
           csv.headers.each do |key|
             record[key.to_s] = row[key]

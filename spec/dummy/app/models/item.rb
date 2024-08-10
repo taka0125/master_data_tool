@@ -1,4 +1,6 @@
 class Item < ApplicationRecord
+  include MasterDataTool::ActAsMasterData
+
   has_many :item_taggings
   has_many :item_tags, through: :item_taggings, source: :tag
 

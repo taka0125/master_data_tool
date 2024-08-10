@@ -36,3 +36,5 @@ ruby/appraisal/generate: up
 gem/release:
 	@read -p "Enter OTP code: " otp_code; \
 	gh workflow run release.yml -f rubygems-otp-code="$$otp_code"
+console: up
+	$(DOCKER_COMPOSE) exec ruby bash -c './bin/console'

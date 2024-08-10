@@ -29,8 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'standalone_activerecord_boot_loader', '>= 0.3  '
   spec.add_development_dependency 'simplecov'
 
-  spec.add_dependency 'activerecord', '>= 5.1.7'
+  spec.add_dependency 'activerecord', '>= 6.0.0'
   spec.add_dependency 'activesupport'
   spec.add_dependency 'thor'
-  spec.add_dependency 'activerecord-import'
 end
