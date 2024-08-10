@@ -1,6 +1,6 @@
 # MasterDataTool
 
-[![Build Status](https://github.com/taka0125/master_data_tool/workflows/Ruby/badge.svg?branch=main)](https://github.com/taka0125/master_data_tool/actions)
+[![Build Status](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml)
 [![Gem Version](https://badge.fury.io/rb/master_data_tool.svg)](https://badge.fury.io/rb/master_data_tool)
 [![Maintainability](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/maintainability)](https://codeclimate.com/github/taka0125/master_data_tool/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/test_coverage)](https://codeclimate.com/github/taka0125/master_data_tool/test_coverage)
