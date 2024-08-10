@@ -2,7 +2,7 @@
 
 module MasterDataTool
   class MasterDataFileCollection
-    def initialize(spec_name, override_identifier: nil)
+    def initialize(spec_name:, override_identifier: nil)
       @spec_name = spec_name
       @override_identifier = override_identifier
       @collection = build
@@ -13,7 +13,7 @@ module MasterDataTool
     def each
       return enum_for(:each) unless block_given?
 
-      @collection.each do |file|
+      collection.each do |file|
         yield file
       end
     end
@@ -24,8 +24,10 @@ module MasterDataTool
 
     private
 
+    attr_reader :spec_name, :override_identifier, :collection
+
     def build
-      files = extract_master_data_csv_paths.presence&.index_by(&:table_name)
+      files = extract_master_data_csv_paths.presence&.index_by(&:table_name) || {}
       overridden_files = overridden_master_data_csv_paths.presence&.index_by(&:table_name) || {}
 
       table_names = (files.keys + overridden_files.keys).uniq
@@ -35,18 +37,18 @@ module MasterDataTool
     end
 
     def extract_master_data_csv_paths
-      pattern = MasterDataTool.config.csv_dir_for(@spec_name).join('*.csv').to_s
+      pattern = MasterDataTool.config.csv_dir_for(spec_name: spec_name).join('*.csv').to_s
       Pathname.glob(pattern).select(&:file?).map do |path|
-        MasterDataFile.build(@spec_name, path, nil)
+        MasterDataFile.build(spec_name: spec_name, path: path, override_identifier: nil)
       end
     end
 
     def overridden_master_data_csv_paths
-      return [] if @override_identifier.blank?
+      return [] if override_identifier.blank?
 
-      pattern = MasterDataTool.config.csv_dir_for(@spec_name, @override_identifier).join('*.csv').to_s
+      pattern = MasterDataTool.config.csv_dir_for(spec_name: spec_name, override_identifier: override_identifier).join('*.csv').to_s
       Pathname.glob(pattern).select(&:file?).map do |path|
-        MasterDataFile.build(@spec_name, path, @override_identifier)
+        MasterDataFile.build(spec_name: spec_name, path: path, override_identifier: override_identifier)
       end
     end
   end

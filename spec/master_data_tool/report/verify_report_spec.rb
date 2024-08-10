@@ -2,11 +2,12 @@
 
 RSpec.describe MasterDataTool::Report::VerifyReport do
   describe '#print' do
-    let(:master_data) { MasterDataTool::MasterData.new(spec_config, MasterDataTool.config.master_data_dir.join('items.csv'), Item) }
+    let(:master_data) { MasterDataTool::MasterData.new(spec_config: spec_config, master_data_file: MasterDataTool.config.master_data_dir.join('items.csv'), model_klass: Item) }
     let(:io) { StringIO.new }
     let(:spec_config) { build_spec_config('') }
+    let(:verify_config) { MasterDataTool::Verify::Config.default_config }
 
-    subject { master_data.verify!(ignore_fail: true).print(DebugPrinter.new(io)) }
+    subject { master_data.verify!(verify_config: verify_config, ignore_fail: true).print(printer: DebugPrinter.new(io)) }
 
     before do
       MasterDataTool.configure do |config|
@@ -16,7 +17,9 @@ RSpec.describe MasterDataTool::Report::VerifyReport do
 
     context '正しいデータのみ' do
       before do
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do
@@ -37,7 +40,10 @@ operation:verify	table_name:items	valid:true	id:3
         MasterDataTool.configure do |config|
           config.master_data_dir = DUMMY_APP_ROOT.join('db/fixtures/verify_spec')
         end
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do

@@ -1,6 +1,6 @@
 # MasterDataTool
 
-[![Build Status](https://github.com/taka0125/master_data_tool/workflows/Ruby/badge.svg?branch=main)](https://github.com/taka0125/master_data_tool/actions)
+[![Build Status](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml)
 [![Gem Version](https://badge.fury.io/rb/master_data_tool.svg)](https://badge.fury.io/rb/master_data_tool)
 [![Maintainability](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/maintainability)](https://codeclimate.com/github/taka0125/master_data_tool/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/test_coverage)](https://codeclimate.com/github/taka0125/master_data_tool/test_coverage)
@@ -46,13 +46,11 @@ Rails.application.reloader.to_prepare do
   MasterDataTool.configure do |config|
     primary_config = MasterDataTool::SpecConfig.new(
       spec_name: :primary,
-      master_data_dir: Rails.root.join('db/fixtures/primary'),
       application_record_class: ::ApplicationRecord
     )
 
     animals_config = MasterDataTool::SpecConfig.new(
       spec_name: :animals,
-      master_data_dir: Rails.root.join('db/fixtures/animals'),
       application_record_class: ::AnimalsRecord
     )
 
@@ -60,7 +58,6 @@ Rails.application.reloader.to_prepare do
       primary_config, animals_config
     ]
   end
-
 end
 ```
 
@@ -71,7 +68,6 @@ Rails.application.reloader.to_prepare do
   MasterDataTool.configure do |config|
     primary_config = MasterDataTool::SpecConfig.new(
       spec_name: '',
-      master_data_dir: Rails.root.join('db/fixtures'),
       application_record_class: ::ApplicationRecord
     )
 
@@ -84,64 +80,57 @@ end
 
 ## Usage
 
+### はじめに
+
+マスタデータとして扱うモデルには `include MasterDataTool::ActAsMasterData` を入れる
+
+```ruby
+
+class Prefecture < ApplicationRecord
+  include MasterDataTool::ActAsMasterData
+end
+```
+
 ### マスタデータの投入
 
-| option                          | default | 内容                                                              |
-|---------------------------------|---------|-----------------------------------------------------------------|
-| --dry-run                       | true    | dry-runモードで実行する（データ変更は行わない）                                     |
-| --verify                        | true    | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
-| --spec-name                     | nil     | 対象となるDBのspec name                                               |
-| --only-import-tables            | []      | 指定したテーブルのみデータ投入を行う                                              |
-| --except-import-tables          | []      | 指定したテーブルのデータ投入を行わない                                             |
-| --only-verify-tables            | []      | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
-| --except-verify-tables          | []      | 指定したテーブルのバリデーションチェックを行わない                                       |
-| --skip-no-change                | true    | CSVファイルに更新がないテーブルをスキップする                                        |
-| --silent                        | false   | 結果の出力をやめる                                                       |
-| --delete-all-ignore-foreign-key | false   | 外部キー制約を無視してレコードを消すかどうか                                          |
-| --override-identifier           | nil     | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
+| option                            | default | 内容                                                              |
+|-----------------------------------|---------|-----------------------------------------------------------------|
+| --spec-name                       | nil     | 対象となるDBのspec name                                               |
+| --dry-run                         | true    | dry-runモードで実行する（データ変更は行わない）                                     |
+| --verify                          | true    | データ投入後に全テーブル・全レコードのバリデーションチェックを行う                               |
+| --silent                          | false   | 結果の出力をやめる                                                       |
+| --override-identifier             | nil     | fixtures/#{override_identifier} のディレクトリにある内容でfixturesを上書きして投入する |
+| --only-import-tables              | []      | 指定したテーブルのみデータ投入を行う                                              |
+| --except-import-tables            | []      | 指定したテーブルのデータ投入を行わない                                             |
+| --skip-no-change                  | true    | CSVファイルに更新がないテーブルをスキップする                                        |
+| --ignore-foreign-key              | true    | 外部キー制約を無視する                                                     |
+| --only-verify-tables              | []      | 指定したテーブルのみ投入後のバリデーションチェックを行う                                    |
+| --except-verify-tables            | []      | 指定したテーブルのバリデーションチェックを行わない                                       |
+| --preload-belongs-to-associations | true    | belongs_toのアソシエーションをpreloadするかどうか                               |
 
 ```bash
 bundle exec master_data_tool import
 ```
 
-は以下のオプションを指定したものと一緒
+### すべてのDBに対してマスタデータの投入
 
 ```bash
-bundle exec thor master_data_tool import \
-  --dry-run=true \
-  --verify=true \
-  --only-import-tables="" \
-  --except-import-tables="" \
-  --only-verify-tables="" \
-  --except-verify-tables="" \
-  --skip-no-change=true \
-  --silent=false \
-  --delete-all-ignore-foreign-key=false
+bundle exec master_data_tool import_all
 ```
 
 ### ダンプ
 
-| option                | default | 内容              |
-|-----------------------|---------|-----------------|
-| --ignore-empty-table  | true    | 空のテーブルを無視する     |
-| --ignore-tables       | []      | 指定したテーブルを無視する   |
-| --ignore-column-names | []      | 指定したカラムを無視する    |
-| --only-tables | nil     | 指定したテーブルのみダンプする |
-| --verbose      | false   | 詳細表示            |
+| option                | default | 内容                |
+|-----------------------|---------|-------------------|
+| --spec-name           | nil     | 対象となるDBのspec name |
+| --ignore-empty-table  | true    | 空のテーブルを無視する       |
+| --ignore-tables       | []      | 指定したテーブルを無視する     |
+| --ignore-column-names | []      | 指定したカラムを無視する      |
+| --only-tables         | []      | 指定したテーブルのみダンプする   |
+| --verbose             | false   | 詳細表示              |
 
 ```bash
 bundle exec master_data_tool dump
-```
-
-は以下のオプションを指定したものと一緒
-
-```bash
-bundle exec master_data_tool dump \
-  --ignore-empty-table=true \
-  --ignore-tables="" \
-  --ignore-column-names="" \
-  --only-tables="" \
-  --verbose=false
 ```
 
 ## マイグレーション
@@ -200,10 +189,6 @@ grep 'operation:import' /tmp/dry-run.txt | grep 'label:detail' | grep 'status:de
 grep 'operation:import' /tmp/dry-run.txt | grep 'label:detail' | grep 'status:new'
 ```
 
-## TODO
-
-- upsert_allに移行する
-
 ## Test
 
 docker-composeでMySQLを立ち上げてテストを実行する。
@@ -216,7 +201,7 @@ docker-compose up -d
 
 ```
 export DB_HOST=127.0.0.1
-export DB_PORT=`docker port master_data_tool_mysql57 3306 | cut -f 2 -d ':'`
+export DB_PORT=`docker port master_data_tool-mysql 3306 | cut -f 2 -d ':'`
 export DB_USERNAME=root
 export DB_PASSWORD=f3WpxNreVT2NgQry
 export DB_NAME=master_data_tool_test
@@ -226,15 +211,15 @@ export DB_NAME=master_data_tool_test
     - direnvを使っているならば `direnv reload` すればいい
 
 ```
-./scripts/setup.sh
+make setup
 ```
 
 ## rspec
 
 ```
-bundle exec appraisal activerecord52 rspec
-bundle exec appraisal activerecord61 rspec
 bundle exec appraisal activerecord70 rspec
+bundle exec appraisal activerecord71 rspec
+bundle exec appraisal activerecord72 rspec
 ```
 
 ## Contributing

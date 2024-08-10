@@ -9,71 +9,9 @@ require environment_path
 
 module MasterDataTool
   class CLI < Thor
-    option :dry_run, default: nil, type: :boolean
-    option :verify, default: nil, type: :boolean
-    option :spec_name, default: '', type: :string
-    option :only_import_tables, default: nil, type: :array
-    option :except_import_tables, default: nil, type: :array
-    option :only_verify_tables, default: nil, type: :array
-    option :except_verify_tables, default: nil, type: :array
-    option :skip_no_change, default: nil, type: :boolean
-    option :silent, default: nil, type: :boolean
-    option :override_identifier, default: nil, type: :string
-    option :delete_all_ignore_foreign_key, default: nil, type: :boolean
-    desc 'import', 'import'
-    def import
-      spec_config = MasterDataTool.config.spec_config(options[:spec_name])
-      new_options = config.default_import_options.with_indifferent_access.merge(options)
-      new_options[:spec_config] = spec_config
-
-      executor = MasterDataTool::Import::Executor.new(**new_options.symbolize_keys)
-      executor.execute
-    end
-
-    option :dry_run, default: nil, type: :boolean
-    option :verify, default: nil, type: :boolean
-    option :skip_no_change, default: nil, type: :boolean
-    desc 'import_all', 'import all'
-    def import_all
-      MasterDataTool.config.spec_configs.each do |spec_config|
-        new_options = spec_config.default_import_options.with_indifferent_access.merge(options)
-        new_options[:spec_config] = spec_config
-
-        executor = MasterDataTool::Import::Executor.new(**new_options.symbolize_keys)
-        executor.execute
-      end
-    end
-
-    option :spec_name, default: nil, type: :string
-    option :ignore_empty_table, default: true, type: :boolean
-    option :ignore_tables, default: [], type: :array
-    option :ignore_column_names, default: [], type: :array
-    option :only_tables, default: nil, type: :array
-    option :verbose, default: false, type: :boolean
-    desc 'dump', 'dump'
-    def dump
-      ignore_empty_table = options[:ignore_empty_table]
-      ignore_tables = options[:ignore_tables]
-      ignore_column_names = options[:ignore_column_names]
-      only_tables = options[:only_tables]
-      verbose = options[:verbose]
-      spec_config = MasterDataTool.config.spec_config(options[:spec_name])
-
-      executor = MasterDataTool::Dump::Executor.new(
-        spec_config: spec_config,
-        ignore_empty_table: ignore_empty_table,
-        ignore_tables: ignore_tables,
-        ignore_column_names: ignore_column_names,
-        only_tables: only_tables,
-        verbose: verbose
-      )
-      errors = executor.execute
-
-      return if errors.empty?
-
-      message = errors.map { |error| "table:#{error.table}\tmessage:#{error.exception.message}" }.join("\n")
-      raise message
-    end
+    include MasterDataTool::Command::Import
+    include MasterDataTool::Command::Verify
+    include MasterDataTool::Command::Dump
   end
 end
 

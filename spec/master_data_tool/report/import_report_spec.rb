@@ -2,12 +2,12 @@
 
 RSpec.describe MasterDataTool::Report::ImportReport do
   describe '#print' do
-    let(:report) { MasterDataTool::Report::ImportReport.new(master_data) }
+    let(:report) { MasterDataTool::Report::ImportReport.new(master_data: master_data) }
     let(:master_data) { build_master_data('', MasterDataTool.config.master_data_dir.join('tags.csv'), nil) }
     let(:io) { StringIO.new }
     let(:spec_config) { build_spec_config('') }
 
-    subject { report.print(DebugPrinter.new(io)) }
+    subject { report.print(printer: DebugPrinter.new(io)) }
 
     before do
       MasterDataTool.configure do |config|
@@ -40,7 +40,10 @@ operation:import	label:detail	table_name:tags	status:new	id:2
 
     context 'DBに入っているデータから追加があった' do
       before do
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do
@@ -69,7 +72,10 @@ operation:import	label:detail	table_name:tags	status:no_change	id:2
 
     context 'DBに入っているデータから削除があった' do
       before do
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do
@@ -97,7 +103,10 @@ operation:import	label:detail	table_name:tags	status:deleted	id:1
 
     context 'DBに入っているデータから更新があった' do
       before do
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
       end
 
       it 'レポートが表示される' do

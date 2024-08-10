@@ -2,34 +2,57 @@
 
 RSpec.describe MasterDataTool::Import::Executor do
   describe '#execute' do
+    subject { executor.execute }
+
     let(:executor) do
       described_class.new(
         spec_config: spec_config,
+        import_config: import_config,
+        verify_config: verify_config,
         dry_run: false,
         verify: verify,
-        only_import_tables: only_import_tables,
-        except_import_tables: except_import_tables,
-        only_verify_tables: only_verify_tables,
-        except_verify_tables: except_verify_tables,
-        skip_no_change: skip_no_change,
         silent: true,
-        delete_all_ignore_foreign_key: delete_all_ignore_foreign_key,
         override_identifier: override_identifier,
         report_printer: DebugPrinter.new(StringIO.new)
       )
     end
 
-    subject { executor.execute }
-
     let(:spec_config) { build_spec_config('') }
+
+    let(:import_config) do
+      MasterDataTool::Import::Config.new(
+        only_tables: only_import_tables,
+        except_tables: except_import_tables,
+        skip_no_change: skip_no_change,
+        ignore_foreign_key_when_delete: ignore_foreign_key_when_delete
+      )
+    end
+
+    let(:verify_config) do
+      MasterDataTool::Verify::Config.new(
+        only_tables: only_verify_tables,
+        except_tables: except_verify_tables,
+        preload_belongs_to_associations: preload_belongs_to_associations,
+        preload_associations: preload_associations,
+        eager_load_associations: eager_load_associations
+      )
+    end
+
     let(:verify) { true }
+    let(:override_identifier) {}
+
+    # import config
     let(:only_import_tables) { [] }
     let(:except_import_tables) { [] }
+    let(:skip_no_change) { true }
+    let(:ignore_foreign_key_when_delete) { false }
+
+    # verify config
     let(:only_verify_tables) { [] }
     let(:except_verify_tables) { [] }
-    let(:skip_no_change) { true }
-    let(:delete_all_ignore_foreign_key) { false }
-    let(:override_identifier) {}
+    let(:preload_belongs_to_associations) { true }
+    let(:preload_associations) { {} }
+    let(:eager_load_associations) { {} }
 
     let(:master_data_dir) { 'db/fixtures' }
 
@@ -217,19 +240,21 @@ RSpec.describe MasterDataTool::Import::Executor do
       end
     end
 
-    context 'delete_all_ignore_foreign_keyオプション' do
-      let(:delete_all_ignore_foreign_key) { true }
+    context 'ignore_foreign_key_when_deleteオプション' do
+      let(:ignore_foreign_key_when_delete) { true }
       let(:master_data_dir) { 'db/fixtures/foreign_key_spec' }
       let(:skip_no_change) { false }
       let(:silent) { false }
 
-      context 'delete_all_ignore_foreign_key = true' do
+      context 'ignore_foreign_key_when_delete = true' do
         it 'データが投入できる' do
           MasterDataTool.configure do |config|
             config.master_data_dir = DUMMY_APP_ROOT.join(master_data_dir)
           end
 
-          MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+          import_config = MasterDataTool::Import::Config.default_config
+          verify_config = MasterDataTool::Verify::Config.default_config
+          MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, report_printer: DebugPrinter.new(StringIO.new)).execute
 
           # 擬似的にマスタデータの変更を行う
           MasterDataTool.configure do |config|
