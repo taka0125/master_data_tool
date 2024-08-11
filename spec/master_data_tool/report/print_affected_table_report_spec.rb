@@ -6,7 +6,7 @@ RSpec.describe MasterDataTool::Report::PrintAffectedTableReport do
     let(:io) { StringIO.new }
     let(:spec_config) { build_spec_config('') }
 
-    subject { master_data.print_affected_table&.print(DebugPrinter.new(io)) }
+    subject { master_data.print_affected_table&.print(printer: DebugPrinter.new(io)) }
 
     before do
       MasterDataTool.configure do |config|
@@ -30,7 +30,9 @@ operation:affected_table	table_name:items
 
     context 'データ投入は行われない' do
       it 'レポートは表示されない' do
-        MasterDataTool::Import::Executor.new(spec_config: spec_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
+        import_config = MasterDataTool::Import::Config.default_config
+        verify_config = MasterDataTool::Verify::Config.default_config
+        MasterDataTool::Import::Executor.new(spec_config: spec_config, import_config: import_config, verify_config: verify_config, dry_run: false, verify: false, report_printer: DebugPrinter.new(StringIO.new)).execute
         master_data.load
 
         expect(subject).to be_nil

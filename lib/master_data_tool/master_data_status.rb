@@ -19,21 +19,24 @@ module MasterDataTool
       version != self.class.decide_version(master_data_file.path)
     end
 
+    def model_klass
+      Object.const_get(name.classify)
+    end
+
     class << self
-      def fetch_all
-        all.index_by(&:name)
-      end
-
-      def build(spec_name, master_data_file)
+      def build(spec_name:, master_data_file:)
         version = decide_version(master_data_file.path)
-        new(spec_name: spec_name, name: MasterDataTool.resolve_table_name(spec_name, master_data_file.path, master_data_file.override_identifier), version: version)
+        name = MasterDataTool.resolve_table_name(spec_name: spec_name, csv_path: master_data_file.path, override_identifier: master_data_file.override_identifier)
+        new(spec_name: spec_name, name: name, version: version)
       end
 
-      def import_records!(records, dry_run: true)
+      def import_records!(records:, dry_run: true)
         if dry_run
           pp records
           return
         end
+
+        return if records.empty?
 
         import_records = records.map { |obj| obj.attributes.slice(*import_columns) }
         upsert_all(import_records, update_only: %w[version])

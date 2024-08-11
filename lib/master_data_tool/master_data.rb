@@ -2,10 +2,11 @@
 
 module MasterDataTool
   class MasterData
+    BULK_INSERT_SIZE = 1000
+
     attr_reader :master_data_file, :model_klass, :columns, :spec_config
 
-    # @param [MasterDataTool::MasterDataFile] master_data_file
-    def initialize(spec_config, master_data_file, model_klass)
+    def initialize(spec_config:, master_data_file:, model_klass:)
       @spec_config = spec_config
       @master_data_file = master_data_file
       @model_klass = model_klass
@@ -19,9 +20,9 @@ module MasterDataTool
     end
 
     class << self
-      def build(spec_config, master_data_file, load: false)
+      def build(spec_config:, master_data_file:, load: false)
         model_klass = Object.const_get(master_data_file.table_name.classify)
-        new(spec_config, master_data_file, model_klass).tap do |record|
+        new(spec_config: spec_config, master_data_file: master_data_file, model_klass: model_klass).tap do |record|
           record.load if load
         end
       end
@@ -116,34 +117,39 @@ module MasterDataTool
       model_klass.table_name
     end
 
-    def import!(dry_run: true, delete_all_ignore_foreign_key: false)
+    def import!(import_config:, dry_run: true)
       raise MasterDataTool::NotLoadedError unless loaded?
 
-      MasterDataTool::Report::ImportReport.new(self).tap do |report|
+      ignore_foreign_key_when_delete = import_config.ignore_foreign_key_when_delete
+
+      MasterDataTool::Report::ImportReport.new(master_data: self).tap do |report|
         return report if dry_run
         return report unless affected?
 
-        disable_foreign_key_checks if delete_all_ignore_foreign_key
+        disable_foreign_key_checks if ignore_foreign_key_when_delete
         model_klass.delete_all
-        enable_foreign_key_checks if delete_all_ignore_foreign_key
+        enable_foreign_key_checks if ignore_foreign_key_when_delete
 
-        records = import_records.map { |obj| obj.attributes.slice(*columns) }
-        model_klass.insert_all(records)
+        import_records.each_slice(BULK_INSERT_SIZE) do |chunked_import_records|
+          records = chunked_import_records.map { |obj| obj.attributes.slice(*columns) }
+          model_klass.insert_all(records)
+        end
       end
     end
 
-    def verify!(ignore_fail: false)
-      MasterDataTool::Report::VerifyReport.new(self).tap do |report|
-        belongs_to_associations = model_klass.reflections.values.select(&:belongs_to?).map(&:name)
+    def verify!(verify_config:, ignore_fail: false)
+      MasterDataTool::Report::VerifyReport.new(master_data: self).tap do |report|
+        preload_associations = decide_preload_associations(verify_config)
+        eager_load_associations = decide_eager_load_associations(verify_config)
 
         scoped = model_klass.all
-        scoped = scoped.preload(*belongs_to_associations) unless belongs_to_associations.empty?
-        scoped = scoped.preload(preload_associations) if preload_associations
-        scoped = scoped.eager_load(eager_load_associations) if eager_load_associations
+        scoped = scoped.preload(preload_associations) unless preload_associations.empty?
+        scoped = scoped.eager_load(eager_load_associations) unless eager_load_associations.empty?
 
         scoped.find_each do |record|
           valid = record.valid?
-          report.append(MasterDataTool::Report::VerifyReport.build_verify_record_report(self, record, valid))
+          report.append(report: MasterDataTool::Report::VerifyReport.build_verify_record_report(master_data: self, record: record, valid: valid))
+
           next if valid
           next if ignore_fail
 
@@ -159,20 +165,22 @@ module MasterDataTool
       return unless loaded?
       return unless affected?
 
-      MasterDataTool::Report::PrintAffectedTableReport.new(self)
+      MasterDataTool::Report::PrintAffectedTableReport.new(master_data: self)
     end
 
     private
 
     attr_writer :loaded, :columns, :new_records, :updated_records,
-                  :no_change_records, :deleted_records
+                :no_change_records, :deleted_records
 
-    def preload_associations
-      @preload_associations ||= spec_config.preload_associations.dig(model_klass.to_s.to_sym)
+    def decide_preload_associations(verify_config)
+      preload_associations = model_klass.reflections.values.select(&:belongs_to?).map(&:name).map(&:to_sym) if verify_config.preload_belongs_to_associations
+      preload_associations += verify_config.preload_associations.dig(model_klass.to_s.to_sym)&.map(&:to_sym) || []
+      preload_associations.uniq
     end
 
-    def eager_load_associations
-      @eager_load_associations ||= spec_config.eager_load_associations.dig(model_klass.to_s.to_sym)
+    def decide_eager_load_associations(verify_config)
+      verify_config.eager_load_associations.dig(model_klass.to_s.to_sym)&.map(&:to_sym) || []
     end
 
     def build_records_from_csv(csv, old_records_by_id)

@@ -5,7 +5,7 @@ module MasterDataTool
     class DefaultPrinter
       include Printer
 
-      def print(message)
+      def print(message:)
         return if silent
         return if message.blank?
 

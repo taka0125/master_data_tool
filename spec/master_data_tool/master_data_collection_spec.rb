@@ -8,7 +8,7 @@ RSpec.describe MasterDataTool::MasterDataCollection do
   end
 
   describe '#append' do
-    subject { collection.append(master_data) }
+    subject { collection.append(master_data: master_data) }
 
     let(:collection) { described_class.new }
     let(:master_data) { build_master_data('', MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil) }
@@ -27,8 +27,8 @@ RSpec.describe MasterDataTool::MasterDataCollection do
       items_master_data = build_master_data('', MasterDataTool.config.master_data_dir.join('items.csv'), nil)
       tags_master_data = build_master_data('', MasterDataTool.config.master_data_dir.join('001_tags.csv'), nil)
 
-      collection.append(items_master_data)
-      collection.append(tags_master_data)
+      collection.append(master_data: items_master_data)
+      collection.append(master_data: tags_master_data)
 
       raw_collection = collection.to_a
       expect(raw_collection).to eq [tags_master_data, items_master_data]

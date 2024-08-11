@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
 
-  spec.files = Dir['LICENSE', 'README.md', 'lib/**/*', 'exe/**/*', 'sig/**/*']
+  spec.files = Dir['lib/**/*', 'exe/**/*', 'sig/**/*']
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
@@ -28,6 +28,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'database_cleaner-active_record'
   spec.add_development_dependency 'standalone_activerecord_boot_loader', '>= 0.3  '
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'rbs'
+  spec.add_development_dependency 'typeprof'
 
   spec.add_dependency 'activerecord', '>= 6.0.0'
   spec.add_dependency 'activesupport'

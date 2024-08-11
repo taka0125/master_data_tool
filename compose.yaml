@@ -1,5 +1,6 @@
 services:
   mysql:
+    container_name: master_data_tool-mysql
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -14,7 +15,7 @@ services:
         --innodb-file-per-table=1
 
   ruby:
-    image: ruby:3.3
+    image: ruby:3.2
     command: sleep infinity
     working_dir: /app
     volumes:

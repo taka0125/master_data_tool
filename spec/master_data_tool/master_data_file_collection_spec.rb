@@ -8,7 +8,7 @@ RSpec.describe MasterDataTool::MasterDataFileCollection do
   end
 
   describe '#initialize' do
-    subject { described_class.new(spec_name, override_identifier: override_identifier) }
+    subject { described_class.new(spec_name: spec_name, override_identifier: override_identifier) }
 
     let(:spec_name) { '' }
 
@@ -18,16 +18,16 @@ RSpec.describe MasterDataTool::MasterDataFileCollection do
       it do
         expected_results = [
           MasterDataTool::MasterDataFile.new(
-            '',
-            'items',
-            MasterDataTool.config.master_data_dir.join('items.csv'),
-            nil
+            spec_name: '',
+            table_name: 'items',
+            path: MasterDataTool.config.master_data_dir.join('items.csv'),
+            override_identifier: nil
           ),
           MasterDataTool::MasterDataFile.new(
-            '',
-            'tags',
-            MasterDataTool.config.master_data_dir.join('tags.csv'),
-            nil
+            spec_name: '',
+            table_name: 'tags',
+            path: MasterDataTool.config.master_data_dir.join('tags.csv'),
+            override_identifier: nil
           ),
         ].sort_by(&:basename)
 
@@ -41,16 +41,16 @@ RSpec.describe MasterDataTool::MasterDataFileCollection do
       it do
         expected_results = [
           MasterDataTool::MasterDataFile.new(
-            '',
-            'items',
-            Pathname.new(MasterDataTool.config.master_data_dir).join('items.csv'),
-            nil
+            spec_name: '',
+            table_name: 'items',
+            path: Pathname.new(MasterDataTool.config.master_data_dir).join('items.csv'),
+            override_identifier: nil
           ),
           MasterDataTool::MasterDataFile.new(
-            '',
-            'tags',
-            Pathname.new(MasterDataTool.config.master_data_dir).join(override_identifier).join('tags.csv'),
-            override_identifier
+            spec_name: '',
+            table_name: 'tags',
+            path: Pathname.new(MasterDataTool.config.master_data_dir).join(override_identifier).join('tags.csv'),
+            override_identifier: override_identifier
           ),
         ].sort_by(&:basename)
 

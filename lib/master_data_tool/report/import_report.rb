@@ -5,14 +5,12 @@ module MasterDataTool
     class ImportReport
       include Core
 
-      attr_reader :reports
-
-      def print(printer)
+      def print(printer:)
         reports.each do |_, report|
           if report.is_a?(Array)
-            report.each { |r| printer.print(convert_to_ltsv(r)) }
+            report.each { |r| printer.print(message: convert_to_ltsv(r)) }
           else
-            printer.print(convert_to_ltsv(report))
+            printer.print(message: convert_to_ltsv(report))
           end
         end
       end

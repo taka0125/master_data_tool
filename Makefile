@@ -38,3 +38,7 @@ gem/release:
 	gh workflow run release.yml -f rubygems-otp-code="$$otp_code"
 console: up
 	$(DOCKER_COMPOSE) exec ruby bash -c './bin/console'
+sig/typeprof: up
+	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec typeprof lib/**/*.rb spec/**/*_spec.rb -o sig_generated/master_data_tool.rbs'
+sig/subtract: up
+	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec rbs subtract sig_generated/master_data_tool.rbs sig/master_data_tool.rbs > sig_generated/master_data_tool_diff.rbs'
