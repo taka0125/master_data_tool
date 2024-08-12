@@ -6,12 +6,12 @@ module MasterDataTool
       attr_reader :spec_config
       attr_accessor :silent
 
-      def initialize(spec_config, silent: false)
+      def initialize(spec_config:, silent: false)
         @spec_config = spec_config
         @silent = silent
       end
 
-      def print(message)
+      def print(message:)
         return if silent
 
         raise NotImplementedError

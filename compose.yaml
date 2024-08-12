@@ -1,7 +1,6 @@
-version: '3'
-
 services:
   mysql:
+    container_name: master_data_tool-mysql
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}

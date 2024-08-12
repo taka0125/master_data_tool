@@ -5,34 +5,28 @@ module MasterDataTool
     class Executor
       Error = Struct.new(:table, :exception)
 
-      DEFAULT_IGNORE_TABLES = %w[ar_internal_metadata schema_migrations master_data_statuses]
-      DEFAULT_IGNORE_COLUMNS = %w[created_at updated_at]
-
-      def initialize(spec_config:, ignore_empty_table: true, ignore_tables: [], ignore_column_names: [], only_tables: [], verbose: false)
+      def initialize(spec_config:, dump_config:, verbose: false)
         @spec_config = spec_config
-        @ignore_empty_table = ignore_empty_table
-        @ignore_tables = DEFAULT_IGNORE_TABLES + Array(spec_config.dump_ignore_tables) + ignore_tables
-        @ignore_column_names = DEFAULT_IGNORE_COLUMNS + Array(spec_config.dump_ignore_columns) + ignore_column_names
-        @only_tables = Array(only_tables)
+        @dump_config = dump_config
         @verbose = verbose
       end
 
       def execute
         [].tap do |errors|
           spec_config.application_record_class.connection.tables.each do |table|
-            if ignore_tables.include?(table)
+            if dump_config.ignore_tables.include?(table)
               print_message "[ignore] #{table}"
 
               next
             end
 
-            if only_tables.any? && !only_tables.include?(table)
+            if dump_config.only_tables.any? && !dump_config.only_tables.include?(table)
               print_message "[skip] #{table}"
               next
             end
 
             dump_to_csv(table)
-          rescue => e
+          rescue StandardError => e
             errors << Error.new(table, e)
           end
         end
@@ -40,7 +34,7 @@ module MasterDataTool
 
       private
 
-      attr_reader :spec_config, :ignore_empty_table, :ignore_tables, :ignore_column_names, :only_tables, :verbose
+      attr_reader :spec_config, :dump_config, :verbose
 
       def print_message(message)
         return unless verbose
@@ -56,11 +50,11 @@ module MasterDataTool
           return
         end
 
-        csv_path = MasterDataTool.config.csv_dir_for(spec_config.spec_name).join("#{table}.csv")
+        csv_path = MasterDataTool.config.csv_dir_for(spec_name: spec_config.spec_name).join("#{table}.csv")
         FileUtils.mkdir_p(csv_path.dirname)
 
         CSV.open(csv_path, 'w', force_quotes: true) do |csv|
-          headers = model_klass.column_names - ignore_column_names
+          headers = model_klass.column_names - dump_config.ignore_column_names
 
           csv << headers
 
@@ -76,7 +70,7 @@ module MasterDataTool
       end
 
       def ignore?(model_klass)
-        return false unless ignore_empty_table
+        return false unless dump_config.ignore_empty_table
 
         model_klass.count < 1
       end

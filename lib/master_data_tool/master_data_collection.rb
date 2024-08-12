@@ -6,7 +6,7 @@ module MasterDataTool
       @collection = []
     end
 
-    def append(master_data)
+    def append(master_data:)
       @collection << master_data
     end
 

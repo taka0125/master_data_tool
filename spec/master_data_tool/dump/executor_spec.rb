@@ -4,10 +4,13 @@ RSpec.describe MasterDataTool::Dump::Executor do
   describe '#execute' do
     let(:executor) do
       described_class.new(
-        spec_config: spec_config
+        spec_config: spec_config,
+        dump_config: dump_config
       )
     end
+
     let(:spec_config) { build_spec_config('') }
+    let(:dump_config) { MasterDataTool::Dump::Config.default_config }
 
     subject { executor.execute }
 
@@ -27,8 +30,8 @@ RSpec.describe MasterDataTool::Dump::Executor do
       subject
 
       expected_csv = <<~EOD
-      "id","field1","field2","field3"
-      "123","dump1","dump2","dump3"
+        "id","field1","field2","field3"
+        "123","dump1","dump2","dump3"
       EOD
 
       expect(MasterDataTool.config.master_data_dir.join('items.csv').read).to eq expected_csv

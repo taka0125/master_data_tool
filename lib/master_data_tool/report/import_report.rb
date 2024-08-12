@@ -5,14 +5,12 @@ module MasterDataTool
     class ImportReport
       include Core
 
-      attr_reader :reports
-
-      def print(printer)
+      def print(printer:)
         reports.each do |_, report|
           if report.is_a?(Array)
-            report.each { |r| printer.print(convert_to_ltsv(r)) }
+            report.each { |r| printer.print(message: convert_to_ltsv(r)) }
           else
-            printer.print(convert_to_ltsv(report))
+            printer.print(message: convert_to_ltsv(report))
           end
         end
       end
@@ -27,12 +25,12 @@ module MasterDataTool
         label = :count_report
         {}.tap do |report|
           report[label] = []
-          report[label] << {operation: :import, label: :count, table_name: master_data.table_name, before: master_data.before_count, after: master_data.after_count}
-          report[label] << {operation: :import, label: :affected, table_name: master_data.table_name, affected: master_data.affected?}
-          report[label] << {operation: :import, label: :new_count, table_name: master_data.table_name, count: master_data.new_records.count}
-          report[label] << {operation: :import, label: :updated_count, table_name: master_data.table_name, count: master_data.updated_records.count}
-          report[label] << {operation: :import, label: :no_change_count, table_name: master_data.table_name, count: master_data.no_change_records.count}
-          report[label] << {operation: :import, label: :deleted_count, table_name: master_data.table_name, count: master_data.deleted_records.count}
+          report[label] << { operation: :import, label: :count, table_name: master_data.table_name, before: master_data.before_count, after: master_data.after_count }
+          report[label] << { operation: :import, label: :affected, table_name: master_data.table_name, affected: master_data.affected? }
+          report[label] << { operation: :import, label: :new_count, table_name: master_data.table_name, count: master_data.new_records.count }
+          report[label] << { operation: :import, label: :updated_count, table_name: master_data.table_name, count: master_data.updated_records.count }
+          report[label] << { operation: :import, label: :no_change_count, table_name: master_data.table_name, count: master_data.no_change_records.count }
+          report[label] << { operation: :import, label: :deleted_count, table_name: master_data.table_name, count: master_data.deleted_records.count }
         end
       end
 
@@ -41,7 +39,7 @@ module MasterDataTool
         {}.tap do |report|
           report[label] = []
           master_data.new_records.each do |record|
-            report[label] << {operation: :import, label: :detail, table_name: master_data.table_name, status: :new, id: record.id}
+            report[label] << { operation: :import, label: :detail, table_name: master_data.table_name, status: :new, id: record.id }
           end
         end
       end
@@ -51,7 +49,7 @@ module MasterDataTool
         {}.tap do |report|
           report[label] = []
           master_data.updated_records.each do |record|
-            report[label] << {operation: :import, label: :detail, table_name: master_data.table_name, status: :updated, id: record.id, detail: record.changes_to_save}
+            report[label] << { operation: :import, label: :detail, table_name: master_data.table_name, status: :updated, id: record.id, detail: record.changes_to_save }
           end
         end
       end
@@ -61,7 +59,7 @@ module MasterDataTool
         {}.tap do |report|
           report[label] = []
           master_data.no_change_records.each do |record|
-            report[label] << {operation: :import, label: :detail, table_name: master_data.table_name, status: :no_change, id: record.id}
+            report[label] << { operation: :import, label: :detail, table_name: master_data.table_name, status: :no_change, id: record.id }
           end
         end
       end
@@ -71,7 +69,7 @@ module MasterDataTool
         {}.tap do |report|
           report[label] = []
           master_data.deleted_records.each do |record|
-            report[label] << {operation: :import, label: :detail, table_name: master_data.table_name, status: :deleted, id: record.id}
+            report[label] << { operation: :import, label: :detail, table_name: master_data.table_name, status: :deleted, id: record.id }
           end
         end
       end

@@ -46,20 +46,27 @@ class DebugPrinter
     @io = io
   end
 
-  def print(message)
+  def print(message:)
     @io.puts message
   end
 end
 
 def build_master_data(spec_name, path, override_identifier)
-  f = MasterDataTool::MasterDataFile.build(spec_name, path, override_identifier)
-  MasterDataTool::MasterData.build(build_spec_config(spec_name), f)
+  f = MasterDataTool::MasterDataFile.build(spec_name: spec_name, path: path, override_identifier: override_identifier)
+  MasterDataTool::MasterData.build(spec_config: build_spec_config(spec_name), master_data_file: f)
 end
 
 def build_spec_config(spec_name, preload_associations: {}, eager_load_associations: {})
+  verify_config = MasterDataTool::Verify::Config.default_config.configure do |c|
+    c.preload_associations = preload_associations
+    c.eager_load_associations = eager_load_associations
+  end
+
   MasterDataTool::SpecConfig.new(
     spec_name: spec_name, application_record_class: ::ApplicationRecord,
-    preload_associations: preload_associations, eager_load_associations: eager_load_associations
+    import_config: MasterDataTool::Import::Config.default_config,
+    verify_config: verify_config,
+    dump_config: MasterDataTool::Dump::Config.default_config
   )
 end
 

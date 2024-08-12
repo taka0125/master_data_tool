@@ -21,3 +21,6 @@ gemfiles/*.gemfile.lock
 
 docker-compose.override.yml
 compose.override.yaml
+
+sig_generated/master_data_tool.rbs
+sig_generated/master_data_tool_diff.rbs
