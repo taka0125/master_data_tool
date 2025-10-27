@@ -20,7 +20,7 @@ create_table 'taggings', id: :bigint, unsigned: true, force: :cascade do |t|
   t.datetime "created_at", null: false
   t.datetime "updated_at", null: false
 
-  t.index %w[tag_id], name: 'key_taggings_1', unique: true
+  t.index %w[tag_id], name: 'key_taggings_1'
 end
 
 create_table 'item_taggings', id: :bigint, unsigned: true, force: :cascade do |t|
