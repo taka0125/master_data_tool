@@ -8,8 +8,6 @@ module MasterDataTool
   end
 
   class Config
-    include ActiveSupport::Configurable
-
     def initialize: () -> void
 
     def spec_config: (String spec_name) -> untyped

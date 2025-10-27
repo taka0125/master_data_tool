@@ -191,10 +191,10 @@ grep 'operation:import' /tmp/dry-run.txt | grep 'label:detail' | grep 'status:ne
 
 ## Test
 
-docker-composeでMySQLを立ち上げてテストを実行する。
+docker composeでMySQLを立ち上げてテストを実行する。
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 以下のENVを設定すること。
