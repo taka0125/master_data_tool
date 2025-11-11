@@ -2,8 +2,8 @@
 
 [![Build Status](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/taka0125/master_data_tool/actions/workflows/main.yml)
 [![Gem Version](https://badge.fury.io/rb/master_data_tool.svg)](https://badge.fury.io/rb/master_data_tool)
-[![Maintainability](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/maintainability)](https://codeclimate.com/github/taka0125/master_data_tool/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/5fc8420c4fe83a2e6c92/test_coverage)](https://codeclimate.com/github/taka0125/master_data_tool/test_coverage)
+[![Maintainability](https://qlty.sh/gh/taka0125/projects/master_data_tool/maintainability.svg)](https://qlty.sh/gh/taka0125/projects/master_data_tool)
+[![Code Coverage](https://qlty.sh/gh/taka0125/projects/master_data_tool/coverage.svg)](https://qlty.sh/gh/taka0125/projects/master_data_tool)
 
 システムが稼働する上で最初から必要なデータ（マスタデータ）を管理するツール
 
@@ -191,10 +191,10 @@ grep 'operation:import' /tmp/dry-run.txt | grep 'label:detail' | grep 'status:ne
 
 ## Test
 
-docker-composeでMySQLを立ち上げてテストを実行する。
+docker composeでMySQLを立ち上げてテストを実行する。
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 以下のENVを設定すること。

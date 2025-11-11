@@ -24,14 +24,15 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'psych', '~> 3.1'
   spec.add_development_dependency 'appraisal'
-  spec.add_development_dependency 'ridgepole'
+  spec.add_development_dependency 'ridgepole', '~> 3.0'
   spec.add_development_dependency 'database_cleaner-active_record'
   spec.add_development_dependency 'standalone_activerecord_boot_loader', '>= 0.3  '
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'rbs'
   spec.add_development_dependency 'typeprof'
 
-  spec.add_dependency 'activerecord', '>= 6.0.0'
+  spec.add_dependency 'activerecord', '>= 7.2'
   spec.add_dependency 'activesupport'
   spec.add_dependency 'thor'
+  spec.add_dependency 'csv'
 end

@@ -1,11 +1,7 @@
-require 'active_support/configurable'
-
 module MasterDataTool
   class Config
-    include ActiveSupport::Configurable
-
-    config_accessor :master_data_dir
-    config_accessor :spec_configs
+    class_attribute :master_data_dir
+    class_attribute :spec_configs
 
     def initialize
       self.master_data_dir = nil

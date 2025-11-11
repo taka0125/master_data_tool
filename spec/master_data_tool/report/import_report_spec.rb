@@ -115,6 +115,8 @@ operation:import	label:detail	table_name:tags	status:deleted	id:1
         end
         master_data.load
 
+        hash = {'name'=>['tag2', 'tag222']}
+
         expected = <<-EOD
 operation:import	label:count	table_name:tags	before:2	after:2
 operation:import	label:affected	table_name:tags	affected:true
@@ -122,7 +124,7 @@ operation:import	label:new_count	table_name:tags	count:0
 operation:import	label:updated_count	table_name:tags	count:1
 operation:import	label:no_change_count	table_name:tags	count:1
 operation:import	label:deleted_count	table_name:tags	count:0
-operation:import	label:detail	table_name:tags	status:updated	id:2	detail:{"name"=>["tag2", "tag222"]}
+operation:import	label:detail	table_name:tags	status:updated	id:2	detail:#{hash}
 operation:import	label:detail	table_name:tags	status:no_change	id:1
         EOD
 
