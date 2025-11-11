@@ -83,9 +83,8 @@ jobs:
           bundle exec rspec
         continue-on-error: ${{ matrix.allow_failures == 'true' }}
 
-      - name: Test report
+      - uses: qltysh/qlty-action/coverage@v2
         if: matrix.ruby == '3.3' && matrix.activerecord == '7.1' && success()
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter after-build
+        with:
+          token: ${{secrets.QLTY_COVERAGE_TOKEN}}
+          files: coverage/.resultset.json
