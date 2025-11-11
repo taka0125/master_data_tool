@@ -4,11 +4,13 @@ ENV['RAILS_ENV'] ||= 'test'
 
 if ENV['CI']
   require 'simplecov'
-
+  require 'simplecov_json_formatter'
   SimpleCov.start do
-    %w[spec].each do |ignore_path|
-      add_filter(ignore_path)
-    end
+    formatter SimpleCov::Formatter::MultiFormatter.new([
+                                                         SimpleCov::Formatter::JSONFormatter,
+                                                         SimpleCov::Formatter::HTMLFormatter
+                                                       ])
+    add_filter '/spec/'
   end
 end
 
