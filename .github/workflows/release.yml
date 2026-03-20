@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   release-gem:
-    uses: taka0125/rubygems_release_workflow/.github/workflows/release.yml@v1
+    uses: taka0125/rubygems_release_workflow/.github/workflows/release.yml@latest
     with:
       rubygems-otp-code: ${{ github.event.inputs.rubygems-otp-code }}
       user-email: taka0125@gmail.com
