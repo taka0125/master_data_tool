@@ -27,9 +27,9 @@ jobs:
 
       matrix:
         ruby:
-          - '3.2'
           - '3.3'
           - '3.4'
+          - '4.0'
         activerecord:
           - '7.2'
           - '8.0'
