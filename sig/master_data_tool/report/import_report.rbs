@@ -1,0 +1,23 @@
+module MasterDataTool
+  module Report
+    class ImportReport
+      include Core
+
+      def reports: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+
+      def print: (printer: Printer) -> untyped
+
+      private
+
+      def count_report: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+
+      def new_records_report: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+
+      def updated_records_report: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+
+      def no_change_records_report: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+
+      def deleted_records_report: () -> Hash[Symbol, Array[Hash[untyped, untyped]]]
+    end
+  end
+end

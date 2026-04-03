@@ -1,0 +1,5 @@
+dependencies:
+  - name: activerecord
+  - name: activesupport
+  - name: thor
+  - name: csv

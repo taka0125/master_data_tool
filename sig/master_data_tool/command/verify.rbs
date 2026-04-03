@@ -1,0 +1,15 @@
+module MasterDataTool
+  module Command
+    module Verify
+      extend ActiveSupport::Concern
+
+      def verify: () -> untyped
+
+      def verify_all: () -> untyped
+
+      private
+
+      def build_verify_executor: (SpecConfig spec_config) -> untyped
+    end
+  end
+end

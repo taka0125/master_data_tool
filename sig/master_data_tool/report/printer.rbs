@@ -1,0 +1,13 @@
+module MasterDataTool
+  module Report
+    module Printer
+      attr_reader spec_config: SpecConfig
+
+      attr_accessor silent: bool
+
+      def initialize: (spec_config: SpecConfig, silent: bool) -> void
+
+      def print: (message: String) -> nil
+    end
+  end
+end

@@ -1,0 +1,15 @@
+module MasterDataTool
+  module Command
+    module Import
+      extend ActiveSupport::Concern
+
+      def import: () -> untyped
+
+      def import_all: () -> untyped
+
+      private
+
+      def build_import_executor: (SpecConfig spec_config) -> untyped
+    end
+  end
+end

@@ -1,0 +1,69 @@
+module MasterDataTool
+  class MasterData
+    @affected: bool
+    @before_count: Integer
+    @after_count: Integer
+
+    BULK_INSERT_SIZE: Integer
+
+    attr_reader master_data_file: MasterDataFile
+    attr_reader model_klass: Class
+    attr_reader columns: Array[String]
+    attr_reader spec_config: SpecConfig
+
+    def initialize: (spec_config: SpecConfig, master_data_file: MasterDataFile, model_klass: Class) -> void
+
+    def self.build: (spec_config: SpecConfig, master_data_file: MasterDataFile, ?load: bool) -> MasterData
+
+    def basename: () -> Pathname
+
+    def load: () -> true
+
+    def import_records: () -> Array[ActiveRecord::Base]
+
+    def affected_records: () -> Array[ActiveRecord::Base]
+
+    def new_records: () -> Array[ActiveRecord::Base]
+
+    def updated_records: () -> Array[ActiveRecord::Base]
+
+    def no_change_records: () -> Array[ActiveRecord::Base]
+
+    def deleted_records: () -> Array[ActiveRecord::Base]
+
+    def loaded?: () -> bool
+
+    def affected?: () -> bool
+
+    def before_count: () -> Integer
+
+    def after_count: () -> Integer
+
+    def table_name: () -> String
+
+    def import!: (import_config: Import::Config, ?dry_run: bool) -> Report::ImportReport
+
+    def verify!: (verify_config: Verify::Config, ?ignore_fail: bool) -> Report::VerifyReport
+
+    def print_affected_table: () -> Report::PrintAffectedTableReport?
+
+    private
+
+    attr_writer loaded: bool
+    attr_writer columns: Array[String]
+    attr_writer new_records: Array[ActiveRecord::Base]
+    attr_writer updated_records: Array[ActiveRecord::Base]
+    attr_writer no_change_records: Array[ActiveRecord::Base]
+    attr_writer deleted_records: Array[ActiveRecord::Base]
+
+    def decide_preload_associations: (Verify::Config verify_config) -> Array[String]
+
+    def decide_eager_load_associations: (Verify::Config verify_config) -> Array[String]
+
+    def build_records_from_csv: (untyped csv, Hash[Integer, ActiveRecord::Base] old_records_by_id) -> Hash[Integer, ActiveRecord::Base]
+
+    def enable_foreign_key_checks: () -> void
+
+    def disable_foreign_key_checks: () -> void
+  end
+end

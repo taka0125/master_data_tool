@@ -1,0 +1,14 @@
+module MasterDataTool
+  class MasterDataCollection
+    @collection: Array[MasterData]
+
+    def initialize: () -> void
+
+    def append: (master_data: MasterData) -> Array[MasterData]
+
+    def each: () { (MasterData) -> void } -> void
+            | () -> Enumerator[MasterData, void]
+
+    def to_a: () -> Array[MasterData]
+  end
+end

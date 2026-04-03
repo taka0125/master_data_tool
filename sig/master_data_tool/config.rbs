@@ -1,0 +1,9 @@
+module MasterDataTool
+  class Config
+    def initialize: () -> void
+
+    def spec_config: (String spec_name) -> SpecConfig?
+
+    def csv_dir_for: (spec_name: String, ?override_identifier: String?) -> Pathname
+  end
+end
