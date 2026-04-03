@@ -1,0 +1,15 @@
+module MasterDataTool
+  module Report
+    module Core
+      attr_reader master_data: MasterData
+
+      def initialize: (master_data: MasterData) -> void
+
+      def print: (printer: Printer) -> untyped
+
+      private
+
+      def convert_to_ltsv: ({ operation: :affected_table, table_name: String } items) -> String
+    end
+  end
+end

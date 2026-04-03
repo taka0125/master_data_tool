@@ -1,0 +1,22 @@
+module MasterDataTool
+  class MasterDataFileCollection
+    def initialize: (spec_name: String, ?override_identifier: String?) -> void
+
+    def to_a: () -> Array[MasterDataFile]
+
+    def each: () { (MasterDataFile) -> void } -> void
+            | () -> Enumerator[MasterDataFile, void]
+
+    private
+
+    attr_reader spec_name: String
+    attr_reader override_identifier: String?
+    attr_reader collection: Array[MasterDataFile]
+
+    def build: () -> untyped
+
+    def extract_master_data_csv_paths: () -> untyped
+
+    def overridden_master_data_csv_paths: () -> Array[untyped]
+  end
+end

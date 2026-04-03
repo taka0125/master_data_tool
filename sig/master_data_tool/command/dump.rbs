@@ -1,0 +1,9 @@
+module MasterDataTool
+  module Command
+    module Dump
+      extend ActiveSupport::Concern
+
+      def dump: () -> nil
+    end
+  end
+end

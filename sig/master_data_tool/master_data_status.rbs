@@ -1,0 +1,17 @@
+module MasterDataTool
+  class MasterDataStatus < ::ActiveRecord::Base
+    def will_change?: (MasterDataFile master_data_file) -> bool
+
+    def model_klass: () -> Class
+
+    def self.build: (spec_name: String, master_data_file: MasterDataFile) -> MasterDataStatus
+
+    def self.import_records!: (records: Array[MasterDataStatus], ?dry_run: bool) -> nil
+
+    def self.decide_version: (Pathname csv_path) -> String
+
+    private
+
+    def self.import_columns: () -> Array[String]
+  end
+end

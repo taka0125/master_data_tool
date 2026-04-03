@@ -1,0 +1,19 @@
+module MasterDataTool
+  module Verify
+    class Executor
+      def initialize: (spec_config: SpecConfig, verify_config: Verify::Config?, silent: bool, override_identifier: String?, report_printer: Report::Printer?) -> void
+
+      def execute: () -> untyped
+
+      private
+
+      attr_reader spec_config: SpecConfig
+      attr_reader verify_config: Verify::Config
+      attr_reader silent: bool
+      attr_reader override_identifier: String?
+      attr_reader report_printer: Report::DefaultPrinter
+
+      def build_master_data_collection: () -> MasterDataCollection
+    end
+  end
+end

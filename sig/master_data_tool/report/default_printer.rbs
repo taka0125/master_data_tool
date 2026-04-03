@@ -1,0 +1,9 @@
+module MasterDataTool
+  module Report
+    class DefaultPrinter
+      include Printer
+
+      def print: (message: String) -> nil
+    end
+  end
+end

@@ -1,0 +1,9 @@
+module MasterDataTool
+  module Report
+    class PrintAffectedTableReport
+      include Core
+
+      def print: (printer: Printer) -> untyped
+    end
+  end
+end

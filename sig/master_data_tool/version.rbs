@@ -1,0 +1,3 @@
+module MasterDataTool
+  VERSION: String
+end

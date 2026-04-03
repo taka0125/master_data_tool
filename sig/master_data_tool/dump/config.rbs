@@ -1,0 +1,24 @@
+module MasterDataTool
+  module Dump
+    class Config
+      DEFAULT_IGNORE_TABLES: Array[String]
+      DEFAULT_IGNORE_COLUMNS: Array[String]
+      DEFAULT_VALUES: { ignore_empty_table: bool, ignore_tables: Array[String], ignore_column_names: Array[String], only_tables: Array[String] }
+
+      attr_accessor ignore_empty_table: bool
+      attr_accessor ignore_tables: Array[String]
+      attr_accessor ignore_column_names: Array[String]
+      attr_accessor only_tables: Array[String]
+
+      def initialize: (ignore_empty_table: bool, ignore_tables: Array[String], ignore_column_names: Array[String], only_tables: Array[String]) -> void
+
+      def configure: () { (Config) -> void } -> void
+
+      def ignore_tables=: (Array[String] tables) -> Array[String]
+
+      def ignore_column_names=: (Array[String] column_names) -> Array[String]
+
+      def self.default_config: () -> Config
+    end
+  end
+end

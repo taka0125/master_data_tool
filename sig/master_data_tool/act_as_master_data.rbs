@@ -1,0 +1,9 @@
+module MasterDataTool
+  module ActAsMasterData
+    extend ActiveSupport::Concern
+
+    module ClassMethods
+      def master_data?: () -> true
+    end
+  end
+end

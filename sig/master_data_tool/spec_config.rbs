@@ -1,0 +1,14 @@
+module MasterDataTool
+  class SpecConfig
+    attr_accessor spec_name: String
+    attr_accessor application_record_class: Class
+    attr_accessor import_config: Import::Config?
+    attr_accessor verify_config: Verify::Config?
+    attr_accessor dump_config: Dump::Config?
+    attr_accessor logger: Logger
+
+    def initialize: (spec_name: String, application_record_class: Class, ?import_config: Import::Config?, ?verify_config: Verify::Config?, ?dump_config: Dump::Config?, ?logger: Logger) -> void
+
+    def configure: () { (SpecConfig) -> void } -> void
+  end
+end

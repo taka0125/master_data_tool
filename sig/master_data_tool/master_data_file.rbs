@@ -1,0 +1,20 @@
+module MasterDataTool
+  class MasterDataFile
+    attr_reader spec_name: String
+    attr_reader table_name: String
+    attr_reader path: Pathname
+    attr_reader override_identifier: String?
+
+    def initialize: (spec_name: String, table_name: String, path: Pathname, override_identifier: String?) -> void
+
+    def self.build: (spec_name: String, path: Pathname, override_identifier: String?) -> MasterDataFile
+
+    def basename: () -> Pathname
+
+    def ==: (Integer | Object other) -> bool
+
+    alias eql? ==
+
+    def hash: () -> Integer
+  end
+end

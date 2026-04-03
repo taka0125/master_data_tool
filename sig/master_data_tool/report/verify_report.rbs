@@ -1,0 +1,17 @@
+module MasterDataTool
+  module Report
+    class VerifyReport
+      include Core
+
+      attr_reader reports: Array[{ operation: :verify, table_name: String, valid: bool, id: Integer }]
+
+      def initialize: (master_data: MasterData) -> void
+
+      def append: (report: { operation: :verify, table_name: String, valid: bool, id: Integer }) -> Array[{ operation: :verify, table_name: String, valid: bool, id: Integer }]
+
+      def print: (printer: Printer) -> untyped
+
+      def self.build_verify_record_report: (master_data: MasterData, record: ActiveRecord::Base, valid: bool) -> { operation: :verify, table_name: String, valid: bool, id: Integer }
+    end
+  end
+end

@@ -1,0 +1,43 @@
+module MasterDataTool
+  module Import
+    class Executor
+      def initialize: (spec_config: SpecConfig, import_config: Import::Config?, verify_config: Verify::Config?, dry_run: bool, verify: bool, silent: bool, override_identifier: String?, report_printer: Report::Printer?) -> void
+
+      def execute: () -> nil
+
+      private
+
+      attr_reader spec_config: SpecConfig
+      attr_reader import_config: Import::Config
+      attr_reader verify_config: Verify::Config
+      attr_reader dry_run: bool
+      attr_reader verify: bool
+      attr_reader silent: bool
+      attr_reader override_identifier: String?
+      attr_reader report_printer: Report::DefaultPrinter
+      attr_reader master_data_statuses_by_name: Hash[String, MasterDataStatus]
+
+      def load_master_data_statuses: () -> Hash[String, MasterDataStatus]
+
+      def print_execute_options: () -> nil
+
+      def build_master_data_collection: () -> MasterDataCollection
+
+      def import_all!: (MasterDataCollection master_data_collection) -> untyped
+
+      def transaction: -> untyped
+
+      def verify_all!: (MasterDataCollection master_data_collection) -> untyped
+
+      def save_master_data_statuses!: (MasterDataCollection master_data_collection) -> untyped
+
+      def print_affected_tables: (MasterDataCollection master_data_collection) -> untyped
+
+      def load_skip_table?: (MasterDataFile master_data_file) -> bool
+
+      def extract_master_data_csv_paths: () -> Array[Pathname]
+
+      def overridden_master_data_csv_paths: () -> Array[Pathname]
+    end
+  end
+end

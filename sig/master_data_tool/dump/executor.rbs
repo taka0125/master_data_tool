@@ -1,0 +1,26 @@
+module MasterDataTool
+  module Dump
+    class Executor
+      class Error < Struct[untyped]
+        attr_accessor table: String
+        attr_accessor exception: StandardError
+      end
+
+      def initialize: (spec_config: SpecConfig, dump_config: Dump::Config, verbose: bool) -> void
+
+      def execute: () -> Array[Error]
+
+      private
+
+      attr_reader spec_config: SpecConfig
+      attr_reader dump_config: Dump::Config
+      attr_reader verbose: bool
+
+      def print_message: (String message) -> nil
+
+      def dump_to_csv: (String table) -> nil
+
+      def ignore?: (Class model_klass) -> bool
+    end
+  end
+end

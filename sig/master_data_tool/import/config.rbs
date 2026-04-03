@@ -1,0 +1,20 @@
+module MasterDataTool
+  module Import
+    class Config
+      DEFAULT_VALUES: { only_tables: Array[String], except_tables: Array[String], skip_no_change: bool, ignore_foreign_key_when_delete: bool }
+
+      attr_accessor only_tables: Array[String]
+      attr_accessor except_tables: Array[String]
+      attr_accessor skip_no_change: bool
+      attr_accessor ignore_foreign_key_when_delete: bool
+
+      def initialize: (only_tables: Array[String], except_tables: Array[String], skip_no_change: bool, ignore_foreign_key_when_delete: bool) -> void
+
+      def skip_table?: (String table_name) -> bool
+
+      def configure: () { (Config) -> void } -> void
+
+      def self.default_config: () -> Config
+    end
+  end
+end
