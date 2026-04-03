@@ -2,20 +2,25 @@ name: Release gem
 
 on:
   workflow_dispatch:
-    inputs:
-      rubygems-otp-code:
-        description: RubyGems OTP code
-        required: true
-
-permissions:
-  contents: write
 
 jobs:
   release-gem:
-    uses: taka0125/rubygems_release_workflow/.github/workflows/release.yml@main
-    with:
-      rubygems-otp-code: ${{ github.event.inputs.rubygems-otp-code }}
-      user-email: taka0125@gmail.com
-      user-name: Takahiro Ooishi
-    secrets:
-      RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+    name: Push gem to RubyGems.org
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+          ruby-version: ruby
+
+      - uses: rubygems/release-gem@v1
