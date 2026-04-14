@@ -1,6 +1,5 @@
 services:
   mysql:
-    container_name: master_data_tool-mysql
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -9,7 +8,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
     command: >
-      mysqld 
+      mysqld
         --sql-mode=NO_ENGINE_SUBSTITUTION
         --character-set-server=utf8mb4
         --innodb-file-per-table=1
@@ -36,3 +35,5 @@ services:
 volumes:
   mysql:
   bundle:
+    external: true
+    name: master_data_tool_bundle
