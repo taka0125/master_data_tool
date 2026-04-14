@@ -45,8 +45,8 @@ volumes:
 2. `master_data_tool_bundle` volume の冪等作成（存在確認 → なければ `docker volume create`）
 3. `COMPOSE_PROJECT_NAME` を export して `docker compose up -d`
 4. MySQL 起動待機（最大30秒ループ、`docker compose exec` で接続確認）
-5. DB 作成（`mysql/create_db` 相当）
-6. マイグレーション（`scripts/migrate.sh` 相当）
+5. DB 作成（`docker compose exec mysql` で直接 SQL 実行 — `make mysql/create_db` ではなくスクリプト内で完結）
+6. マイグレーション（`docker compose exec ruby bash -c './scripts/migrate.sh'` で実行）
 7. `.envrc` 生成（`docker compose port mysql 3306` で実際のホストポートを取得）
 8. 完了メッセージ（`direnv allow` 案内）
 
@@ -95,14 +95,15 @@ make ruby/rspec
 
 ## 初回セットアップ（メインリポジトリ）
 
-既存の `make setup` を使う前に bundle volume を作成する必要がある：
+`worktree-setup.sh` はメインリポジトリでも実行可能な冪等設計にする。既存の `make setup` の代替として機能する。
 
 ```bash
-docker volume create master_data_tool_bundle
-make setup
+# メインリポジトリ初回セットアップ
+bash scripts/worktree-setup.sh
+direnv allow
 ```
 
-または `worktree-setup.sh` がメインリポジトリでも実行可能なように冪等設計にする。
+`docker volume create master_data_tool_bundle` はスクリプト内で冪等に処理するため、手動実行不要。
 
 ## ファイル変更サマリ
 
