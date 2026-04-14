@@ -36,7 +36,7 @@ ${DOCKER_COMPOSE} up -d
 echo "==> Waiting for MySQL..."
 MAX_WAIT=30
 count=0
-until ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql mysql -u "${DB_USER}" -e "SELECT 1" >/dev/null 2>&1; do
+until ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql mysql -h 127.0.0.1 -u "${DB_USER}" -e "SELECT 1" >/dev/null 2>&1; do
   count=$((count + 1))
   if [ "${count}" -ge "${MAX_WAIT}" ]; then
     echo "Error: MySQL did not become ready within ${MAX_WAIT} seconds"
@@ -50,7 +50,7 @@ echo "==> MySQL is ready"
 # Step 4: Create database (idempotent)
 echo "==> Creating database: ${DB_NAME}"
 ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql \
-  mysql -u "${DB_USER}" \
+  mysql -h 127.0.0.1 -u "${DB_USER}" \
   -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
 
 # Step 5: Run migrations
