@@ -4,68 +4,97 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-cd "${REPO_ROOT}"
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-# Load .env.test
-set -a
-# shellcheck source=../.env.test
-source "${REPO_ROOT}/.env.test"
-set +a
+usage() {
+  cat <<EOF
+Usage:
+  $(basename "$0")                  # setup current directory (backward compat)
+  $(basename "$0") setup            # setup current directory
+  $(basename "$0") create <name>    # create worktree + setup
+  $(basename "$0") cleanup <name>   # teardown environment + remove worktree
+EOF
+  exit 1
+}
 
-# Derive COMPOSE_PROJECT_NAME from current directory name
-PROJECT_NAME=$(basename "${REPO_ROOT}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/-/g')
-export COMPOSE_PROJECT_NAME="${PROJECT_NAME}"
+# Derive COMPOSE_PROJECT_NAME from a directory path
+project_name_from_dir() {
+  local dir="$1"
+  basename "${dir}" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]/-/g'
+}
 
-DOCKER_COMPOSE="docker compose --env-file ${REPO_ROOT}/.env.test"
+# ---------------------------------------------------------------------------
+# Core setup logic (runs inside a worktree/repo directory)
+# ---------------------------------------------------------------------------
 
-echo "==> COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}"
+run_setup() {
+  local dir="$1"
 
-# Step 1: Create shared bundle volume (idempotent)
-if ! docker volume inspect master_data_tool_bundle >/dev/null 2>&1; then
-  echo "==> Creating shared bundle volume: master_data_tool_bundle"
-  docker volume create master_data_tool_bundle
-else
-  echo "==> Bundle volume already exists: master_data_tool_bundle"
-fi
+  cd "${dir}"
 
-# Step 2: Start containers
-echo "==> Starting containers..."
-${DOCKER_COMPOSE} up -d
+  # Load .env.test
+  set -a
+  # shellcheck source=../.env.test
+  source "${dir}/.env.test"
+  set +a
 
-# Step 3: Wait for MySQL (max 30 seconds)
-echo "==> Waiting for MySQL..."
-MAX_WAIT=30
-count=0
-until ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql mysql -h 127.0.0.1 -u "${DB_USER}" -e "SELECT 1" >/dev/null 2>&1; do
-  count=$((count + 1))
-  if [ "${count}" -ge "${MAX_WAIT}" ]; then
-    echo "Error: MySQL did not become ready within ${MAX_WAIT} seconds"
-    exit 1
+  local PROJECT_NAME
+  PROJECT_NAME=$(project_name_from_dir "${dir}")
+  export COMPOSE_PROJECT_NAME="${PROJECT_NAME}"
+
+  local DOCKER_COMPOSE="docker compose --env-file ${dir}/.env.test"
+
+  echo "==> COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}"
+
+  # Step 1: Create shared bundle volume (idempotent)
+  if ! docker volume inspect master_data_tool_bundle >/dev/null 2>&1; then
+    echo "==> Creating shared bundle volume: master_data_tool_bundle"
+    docker volume create master_data_tool_bundle
+  else
+    echo "==> Bundle volume already exists: master_data_tool_bundle"
   fi
-  echo "  waiting... (${count}/${MAX_WAIT})"
-  sleep 1
-done
-echo "==> MySQL is ready"
 
-# Step 4: Create database (idempotent)
-echo "==> Creating database: ${DB_NAME}"
-${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql \
-  mysql -h 127.0.0.1 -u "${DB_USER}" \
-  -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
+  # Step 2: Start containers
+  echo "==> Starting containers..."
+  ${DOCKER_COMPOSE} up -d
 
-# Step 5: bundle install
-echo "==> Running bundle install..."
-${DOCKER_COMPOSE} exec -T ruby bash -c 'bundle install'
+  # Step 3: Wait for MySQL (max 30 seconds)
+  echo "==> Waiting for MySQL..."
+  local MAX_WAIT=30
+  local count=0
+  until ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql mysql -h 127.0.0.1 -u "${DB_USER}" -e "SELECT 1" >/dev/null 2>&1; do
+    count=$((count + 1))
+    if [ "${count}" -ge "${MAX_WAIT}" ]; then
+      echo "Error: MySQL did not become ready within ${MAX_WAIT} seconds"
+      exit 1
+    fi
+    echo "  waiting... (${count}/${MAX_WAIT})"
+    sleep 1
+  done
+  echo "==> MySQL is ready"
 
-# Step 6: Run migrations
-echo "==> Running migrations..."
-${DOCKER_COMPOSE} exec -T ruby bash -c './scripts/migrate.sh'
+  # Step 4: Create database (idempotent)
+  echo "==> Creating database: ${DB_NAME}"
+  ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql \
+    mysql -h 127.0.0.1 -u "${DB_USER}" \
+    -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
 
-# Step 7: Get actual host port and generate .envrc
-HOST_PORT=$(${DOCKER_COMPOSE} port mysql 3306 | cut -d: -f2)
-echo "==> MySQL host port: ${HOST_PORT}"
+  # Step 5: bundle install
+  echo "==> Running bundle install..."
+  ${DOCKER_COMPOSE} exec -T ruby bash -c 'bundle install'
 
-cat > "${REPO_ROOT}/.envrc" <<EOF
+  # Step 6: Run migrations
+  echo "==> Running migrations..."
+  ${DOCKER_COMPOSE} exec -T ruby bash -c './scripts/migrate.sh'
+
+  # Step 7: Get actual host port and generate .envrc
+  local HOST_PORT
+  HOST_PORT=$(${DOCKER_COMPOSE} port mysql 3306 | cut -d: -f2)
+  echo "==> MySQL host port: ${HOST_PORT}"
+
+  cat > "${dir}/.envrc" <<EOF
 # auto-generated by scripts/worktree-setup.sh
 # DO NOT EDIT MANUALLY
 export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}
@@ -73,9 +102,121 @@ export DB_HOST=127.0.0.1
 export DB_PORT=${HOST_PORT}
 EOF
 
-echo ""
-echo "==> Setup complete!"
-echo ""
-echo "Run one of the following to activate environment variables:"
-echo "  direnv allow"
-echo "  source .envrc"
+  echo ""
+  echo "==> Setup complete!"
+  echo ""
+  echo "Run one of the following to activate environment variables:"
+  echo "  direnv allow"
+  echo "  source .envrc"
+}
+
+# ---------------------------------------------------------------------------
+# Subcommand: create
+# ---------------------------------------------------------------------------
+
+cmd_create() {
+  local name="${1:-}"
+  if [ -z "${name}" ]; then
+    echo "Error: worktree name required"
+    usage
+  fi
+
+  local MAIN_REPO
+  MAIN_REPO="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir | xargs dirname)"
+  local WORKTREE_DIR="${MAIN_REPO}/worktrees/${name}"
+
+  if [ -d "${WORKTREE_DIR}" ]; then
+    echo "Error: worktree directory already exists: ${WORKTREE_DIR}"
+    exit 1
+  fi
+
+  echo "==> Creating worktree: ${WORKTREE_DIR} (branch: ${name})"
+  git -C "${MAIN_REPO}" worktree add "${WORKTREE_DIR}" -b "${name}"
+
+  echo ""
+  echo "==> Running setup in worktree..."
+  run_setup "${WORKTREE_DIR}"
+
+  echo ""
+  echo "==> Worktree ready. Start Claude Code with:"
+  echo "    claude --worktree ${name}"
+}
+
+# ---------------------------------------------------------------------------
+# Subcommand: cleanup
+# ---------------------------------------------------------------------------
+
+cmd_cleanup() {
+  local name="${1:-}"
+  if [ -z "${name}" ]; then
+    echo "Error: worktree name required"
+    usage
+  fi
+
+  local MAIN_REPO
+  MAIN_REPO="$(git -C "${REPO_ROOT}" rev-parse --path-format=absolute --git-common-dir | xargs dirname)"
+  local WORKTREE_DIR="${MAIN_REPO}/worktrees/${name}"
+
+  if [ ! -d "${WORKTREE_DIR}" ]; then
+    echo "Error: worktree directory not found: ${WORKTREE_DIR}"
+    exit 1
+  fi
+
+  # Load .env.test to get credentials
+  set -a
+  source "${WORKTREE_DIR}/.env.test"
+  set +a
+
+  local PROJECT_NAME
+  PROJECT_NAME=$(project_name_from_dir "${WORKTREE_DIR}")
+  export COMPOSE_PROJECT_NAME="${PROJECT_NAME}"
+
+  local DOCKER_COMPOSE="docker compose --env-file ${WORKTREE_DIR}/.env.test"
+
+  echo "==> COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}"
+
+  # Stop and remove containers + volumes
+  echo "==> Stopping and removing containers..."
+  (cd "${WORKTREE_DIR}" && ${DOCKER_COMPOSE} down -v) || true
+
+  # Remove git worktree
+  echo "==> Removing worktree..."
+  git -C "${MAIN_REPO}" worktree remove "${WORKTREE_DIR}" --force
+
+  # Delete the branch
+  echo "==> Deleting branch: ${name}"
+  git -C "${MAIN_REPO}" branch -D "${name}" || echo "  (branch not found or already deleted)"
+
+  echo ""
+  echo "==> Cleanup complete!"
+}
+
+# ---------------------------------------------------------------------------
+# Dispatch
+# ---------------------------------------------------------------------------
+
+SUBCOMMAND="${1:-setup}"
+
+case "${SUBCOMMAND}" in
+  setup)
+    run_setup "${REPO_ROOT}"
+    ;;
+  create)
+    cmd_create "${2:-}"
+    ;;
+  cleanup)
+    cmd_cleanup "${2:-}"
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    # Backward compat: no subcommand = setup
+    if [ $# -eq 0 ]; then
+      run_setup "${REPO_ROOT}"
+    else
+      echo "Error: unknown subcommand '${SUBCOMMAND}'"
+      usage
+    fi
+    ;;
+esac
