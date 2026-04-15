@@ -27,3 +27,4 @@ worktrees/
 sig_generated/**/*.rbs
 
 .claude/settings.local.json
+docs/superpowers
