@@ -199,7 +199,7 @@ SUBCOMMAND="${1:-setup}"
 
 case "${SUBCOMMAND}" in
   setup)
-    run_setup "${REPO_ROOT}"
+    run_setup "${2:-${REPO_ROOT}}"
     ;;
   create)
     cmd_create "${2:-}"

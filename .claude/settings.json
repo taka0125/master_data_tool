@@ -1,5 +1,17 @@
 {
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true
+  },
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); name=$(echo \"$input\" | jq -r '.name'); cwd=$(echo \"$input\" | jq -r '.cwd'); bash \"$cwd/scripts/worktree-setup.sh\" create \"$name\" 1>&2; echo \"$cwd/worktrees/$name\""
+          }
+        ]
+      }
+    ]
   }
 }
