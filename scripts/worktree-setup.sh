@@ -53,11 +53,15 @@ ${DOCKER_COMPOSE} exec -T -e MYSQL_PWD="${DB_PASSWORD}" mysql \
   mysql -h 127.0.0.1 -u "${DB_USER}" \
   -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
 
-# Step 5: Run migrations
+# Step 5: bundle install
+echo "==> Running bundle install..."
+${DOCKER_COMPOSE} exec -T ruby bash -c 'bundle install'
+
+# Step 6: Run migrations
 echo "==> Running migrations..."
 ${DOCKER_COMPOSE} exec -T ruby bash -c './scripts/migrate.sh'
 
-# Step 6: Get actual host port and generate .envrc
+# Step 7: Get actual host port and generate .envrc
 HOST_PORT=$(${DOCKER_COMPOSE} port mysql 3306 | cut -d: -f2)
 echo "==> MySQL host port: ${HOST_PORT}"
 
