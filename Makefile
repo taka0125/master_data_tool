@@ -5,7 +5,9 @@ help:
 	@grep "^[a-zA-Z][a-zA-Z0-9\-\/\_]*:" -o Makefile | grep -v "grep" | sed -e 's/^/make /' | sed -e 's/://'
 build:
 	$(DOCKER_COMPOSE) build
-up:
+ensure-bundle-volume:
+	@docker volume inspect master_data_tool_bundle >/dev/null 2>&1 || docker volume create master_data_tool_bundle
+up: ensure-bundle-volume
 	$(DOCKER_COMPOSE) up -d
 down:
 	$(DOCKER_COMPOSE) stop
@@ -42,3 +44,5 @@ sig/typeprof: up
 	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec typeprof lib/**/*.rb spec/**/*_spec.rb -o sig_generated/master_data_tool.rbs'
 sig/subtract: up
 	$(DOCKER_COMPOSE) exec ruby bash -c 'bundle exec rbs subtract sig_generated/master_data_tool.rbs sig/master_data_tool.rbs > sig_generated/master_data_tool_diff.rbs'
+worktree/setup:
+	bash scripts/worktree-setup.sh

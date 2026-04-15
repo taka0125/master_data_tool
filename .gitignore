@@ -22,6 +22,8 @@ gemfiles/*.gemfile.lock
 docker-compose.override.yml
 compose.override.yaml
 
+worktrees/
+
 sig_generated/**/*.rbs
 
 .claude/settings.local.json
